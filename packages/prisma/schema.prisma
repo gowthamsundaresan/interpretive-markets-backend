@@ -93,3 +93,10 @@ model ReExecBundle {
 
   createdAt DateTime @default(now())
 }
+
+// Per-event indexing cursor. key e.g. "FrameworkRegistry.FrameworkRegistered".
+model BlockCursor {
+  key       String   @id
+  lastBlock BigInt   @default(0)
+  updatedAt DateTime @updatedAt
+}
