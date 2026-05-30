@@ -1,39 +1,35 @@
 import { ReExecStatus } from '@interpretive/prisma'
-import type { Verdict } from '@interpretive/prisma'
 
 import { reExecuteVerdict } from './reExecuteVerdict'
-import { logger } from './utils/logger'
 import { prisma } from './utils/prismaClient'
+
+const BATCH_SIZE = 10
 
 // --- Core functions ---
 
 export async function checkPendingVerdicts(): Promise<void> {
 	const pending = await prisma.verdict.findMany({
 		where: { reExecStatus: ReExecStatus.pending },
-		take: 10
+		take: BATCH_SIZE
 	})
 
 	if (pending.length === 0) {
-		logger.debug('no pending verdicts')
+		console.log('[In Sync] [Verdicts] no pending verdicts')
 		return
 	}
 
-	logger.info({ count: pending.length }, 'processing pending verdicts')
+	console.time(`[Verdicts] re-execute size: ${pending.length}`)
 	for (const verdict of pending) {
-		await runOne(verdict)
+		try {
+			await reExecuteVerdict(verdict)
+		} catch (err) {
+			console.log(`[Verdicts] re-exec failed for market ${verdict.marketId}`)
+			console.log(err)
+			await prisma.verdict.update({
+				where: { marketId: verdict.marketId },
+				data: { reExecCheckedAt: new Date() }
+			})
+		}
 	}
-}
-
-async function runOne(verdict: Verdict): Promise<void> {
-	try {
-		await reExecuteVerdict(verdict)
-	} catch (err) {
-		logger.error({ err, marketId: verdict.marketId.toString() }, 'reExecuteVerdict failed')
-		await prisma.verdict.update({
-			where: { marketId: verdict.marketId },
-			data: {
-				reExecCheckedAt: new Date()
-			}
-		})
-	}
+	console.timeEnd(`[Verdicts] re-execute size: ${pending.length}`)
 }

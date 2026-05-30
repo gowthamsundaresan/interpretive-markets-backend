@@ -101,3 +101,101 @@ model Setting {
   value     Json
   updatedAt DateTime @updatedAt
 }
+
+// Block timestamp cache — populated by seedBlockData, read by event seeders.
+model Evm_BlockData {
+  number    BigInt   @id
+  timestamp DateTime
+}
+
+// --- Raw event log archives (1:1 with on-chain events) ---
+
+model EventLogs_FrameworkRegistered {
+  address          String
+  transactionHash  String
+  transactionIndex Int
+  blockNumber      BigInt
+  blockHash        String
+  blockTime        DateTime
+
+  frameworkId String
+  uri         String
+  author      String
+  metadata    String
+
+  @@id([transactionHash, transactionIndex])
+}
+
+model EventLogs_JudgeRegistered {
+  address          String
+  transactionHash  String
+  transactionIndex Int
+  blockNumber      BigInt
+  blockHash        String
+  blockTime        DateTime
+
+  imageDigest String
+  signer      String
+
+  @@id([transactionHash, transactionIndex])
+}
+
+model EventLogs_JudgeEnabledSet {
+  address          String
+  transactionHash  String
+  transactionIndex Int
+  blockNumber      BigInt
+  blockHash        String
+  blockTime        DateTime
+
+  imageDigest String
+  enabled     Boolean
+
+  @@id([transactionHash, transactionIndex])
+}
+
+model EventLogs_MarketCreated {
+  address          String
+  transactionHash  String
+  transactionIndex Int
+  blockNumber      BigInt
+  blockHash        String
+  blockTime        DateTime
+
+  marketId         String
+  frameworkId      String
+  judgeImageDigest String
+  creator          String
+
+  @@id([transactionHash, transactionIndex])
+}
+
+model EventLogs_VerdictPosted {
+  address          String
+  transactionHash  String
+  transactionIndex Int
+  blockNumber      BigInt
+  blockHash        String
+  blockTime        DateTime
+
+  marketId  String
+  signer    String
+  bundleRef String
+
+  @@id([transactionHash, transactionIndex])
+}
+
+model EventLogs_VerdictDisputed {
+  address          String
+  transactionHash  String
+  transactionIndex Int
+  blockNumber      BigInt
+  blockHash        String
+  blockTime        DateTime
+
+  marketId String
+  disputer String
+  evidence String
+
+  @@id([transactionHash, transactionIndex])
+}

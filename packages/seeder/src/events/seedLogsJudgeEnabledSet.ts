@@ -7,6 +7,7 @@ import { prisma } from '../utils/prismaClient'
 import {
 	bulkUpdateDbTransactions,
 	fetchLastSyncBlock,
+	getBlockDataFromDb,
 	loopThroughBlocks,
 	saveLastSyncBlockTransaction,
 	type DbTransaction
@@ -38,25 +39,49 @@ export async function seedLogsJudgeEnabledSet(
 			toBlock: windowTo
 		})
 
-		const dbTransactions: DbTransaction[] = []
+		const blockData = await getBlockDataFromDb(windowFrom, windowTo)
+		const rows: {
+			address: string
+			transactionHash: string
+			transactionIndex: number
+			blockNumber: bigint
+			blockHash: string
+			blockTime: Date
+			imageDigest: string
+			enabled: boolean
+		}[] = []
 
 		for (const log of logs) {
-			const { imageDigest, enabled } = (
+			const args = (
 				log as unknown as { args: { imageDigest: `0x${string}`; enabled: boolean } }
 			).args
+			const blockNumber = log.blockNumber ?? 0n
+			rows.push({
+				address: log.address,
+				transactionHash: log.transactionHash ?? '',
+				transactionIndex: log.logIndex ?? 0,
+				blockNumber,
+				blockHash: log.blockHash ?? '',
+				blockTime: blockData.get(blockNumber) ?? new Date(0),
+				imageDigest: args.imageDigest,
+				enabled: args.enabled
+			})
+		}
+
+		const dbTransactions: DbTransaction[] = []
+		if (rows.length > 0) {
 			dbTransactions.push(
-				prisma.judge.update({
-					where: { imageDigest },
-					data: { enabled }
+				prisma.eventLogs_JudgeEnabledSet.createMany({
+					data: rows,
+					skipDuplicates: true
 				})
 			)
 		}
-
 		dbTransactions.push(saveLastSyncBlockTransaction(SYNC_KEY, windowTo))
 
 		await bulkUpdateDbTransactions(
 			dbTransactions,
-			`[Logs] JudgeEnabledSet ${windowFrom}-${windowTo} size: ${logs.length}`
+			`[Logs] JudgeEnabledSet ${windowFrom}-${windowTo} size: ${rows.length}`
 		)
 	})
 }

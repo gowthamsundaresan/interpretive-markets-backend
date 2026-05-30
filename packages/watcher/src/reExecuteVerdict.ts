@@ -10,7 +10,6 @@ import { keccak256, toBytes } from 'viem'
 
 import { fileDispute } from './fileDispute'
 import { getEigenAIClient } from './utils/eigenaiClient'
-import { logger } from './utils/logger'
 import { prisma } from './utils/prismaClient'
 
 // --- Core functions ---
@@ -60,7 +59,7 @@ export async function reExecuteVerdict(verdict: Verdict): Promise<void> {
 	const expected = verdict.verdictHash
 
 	if (reHash !== expected) {
-		logger.warn({ marketId: marketId.toString(), expected, reHash }, 'verdict hash mismatch')
+		console.log(`[Verdicts] hash mismatch for market ${marketId}: expected=${expected} re=${reHash}`)
 		await flagDisputed({ marketId, reExecHash: reHash, reason: 'verdict bytes diverge' })
 		return
 	}
@@ -73,15 +72,14 @@ export async function reExecuteVerdict(verdict: Verdict): Promise<void> {
 			reExecHash: reHash
 		}
 	})
-	logger.info({ marketId: marketId.toString(), reHash }, 'verified')
+	console.log(`[Verdicts] verified market ${marketId} re=${reHash}`)
 }
 
 // --- Helper functions ---
 
 async function fetchBundle(uri: string): Promise<ReExecBundle> {
 	const buf = await content.fetchByUri(uri)
-	const parsed = JSON.parse(buf.toString('utf-8'), reviver) as ReExecBundle
-	return parsed
+	return JSON.parse(buf.toString('utf-8')) as ReExecBundle
 }
 
 async function loadFramework(id: `0x${string}`): Promise<{
@@ -98,7 +96,9 @@ async function loadFramework(id: `0x${string}`): Promise<{
 	const tmp = mkdtempSync(join(tmpdir(), 'framework-watch-'))
 	try {
 		await content.unpackFramework(tarball, tmp)
-		const manifest = JSON.parse(readFileSync(join(tmp, 'manifest.json'), 'utf-8')) as FrameworkManifest
+		const manifest = JSON.parse(
+			readFileSync(join(tmp, 'manifest.json'), 'utf-8')
+		) as FrameworkManifest
 		const systemPrompt = readFileSync(join(tmp, manifest.promptTemplate.system), 'utf-8')
 		return { manifest, systemPrompt }
 	} finally {
@@ -128,10 +128,4 @@ async function flagDisputed(args: {
 		}
 	})
 	await fileDispute({ marketId: args.marketId, counterHash: args.reExecHash, reason: args.reason })
-}
-
-function reviver(_key: string, value: unknown): unknown {
-	// We serialized BigInt as string; values that are bigint-shaped should be left as string
-	// (no automatic re-parse, since we can't distinguish from arbitrary strings).
-	return value
 }

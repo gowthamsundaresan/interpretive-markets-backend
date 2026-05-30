@@ -7,6 +7,7 @@ import { prisma } from '../utils/prismaClient'
 import {
 	bulkUpdateDbTransactions,
 	fetchLastSyncBlock,
+	getBlockDataFromDb,
 	loopThroughBlocks,
 	saveLastSyncBlockTransaction,
 	type DbTransaction
@@ -41,7 +42,19 @@ export async function seedLogsFrameworkRegistered(
 			toBlock: windowTo
 		})
 
-		const dbTransactions: DbTransaction[] = []
+		const blockData = await getBlockDataFromDb(windowFrom, windowTo)
+		const rows: {
+			address: string
+			transactionHash: string
+			transactionIndex: number
+			blockNumber: bigint
+			blockHash: string
+			blockTime: Date
+			frameworkId: string
+			uri: string
+			author: string
+			metadata: string
+		}[] = []
 
 		for (const log of logs) {
 			const args = (
@@ -55,33 +68,34 @@ export async function seedLogsFrameworkRegistered(
 				}
 			).args
 			const blockNumber = log.blockNumber ?? 0n
+			rows.push({
+				address: log.address,
+				transactionHash: log.transactionHash ?? '',
+				transactionIndex: log.logIndex ?? 0,
+				blockNumber,
+				blockHash: log.blockHash ?? '',
+				blockTime: blockData.get(blockNumber) ?? new Date(0),
+				frameworkId: args.id,
+				uri: args.uri,
+				author: args.author,
+				metadata: args.metadata
+			})
+		}
 
+		const dbTransactions: DbTransaction[] = []
+		if (rows.length > 0) {
 			dbTransactions.push(
-				prisma.framework.upsert({
-					where: { id: args.id },
-					create: {
-						id: args.id,
-						uri: args.uri,
-						author: args.author,
-						metadata: Buffer.from(args.metadata.slice(2), 'hex'),
-						registeredAt: new Date(),
-						registeredAtBlock: blockNumber
-					},
-					update: {
-						uri: args.uri,
-						author: args.author,
-						metadata: Buffer.from(args.metadata.slice(2), 'hex'),
-						registeredAtBlock: blockNumber
-					}
+				prisma.eventLogs_FrameworkRegistered.createMany({
+					data: rows,
+					skipDuplicates: true
 				})
 			)
 		}
-
 		dbTransactions.push(saveLastSyncBlockTransaction(SYNC_KEY, windowTo))
 
 		await bulkUpdateDbTransactions(
 			dbTransactions,
-			`[Logs] FrameworkRegistered ${windowFrom}-${windowTo} size: ${logs.length}`
+			`[Logs] FrameworkRegistered ${windowFrom}-${windowTo} size: ${rows.length}`
 		)
 	})
 }

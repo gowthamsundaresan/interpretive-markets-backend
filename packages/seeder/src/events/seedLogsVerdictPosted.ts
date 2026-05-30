@@ -7,6 +7,7 @@ import { prisma } from '../utils/prismaClient'
 import {
 	bulkUpdateDbTransactions,
 	fetchLastSyncBlock,
+	getBlockDataFromDb,
 	loopThroughBlocks,
 	saveLastSyncBlockTransaction,
 	type DbTransaction
@@ -38,7 +39,18 @@ export async function seedLogsVerdictPosted(
 			toBlock: windowTo
 		})
 
-		const dbTransactions: DbTransaction[] = []
+		const blockData = await getBlockDataFromDb(windowFrom, windowTo)
+		const rows: {
+			address: string
+			transactionHash: string
+			transactionIndex: number
+			blockNumber: bigint
+			blockHash: string
+			blockTime: Date
+			marketId: string
+			signer: string
+			bundleRef: string
+		}[] = []
 
 		for (const log of logs) {
 			const args = (
@@ -47,47 +59,33 @@ export async function seedLogsVerdictPosted(
 				}
 			).args
 			const blockNumber = log.blockNumber ?? 0n
+			rows.push({
+				address: log.address,
+				transactionHash: log.transactionHash ?? '',
+				transactionIndex: log.logIndex ?? 0,
+				blockNumber,
+				blockHash: log.blockHash ?? '',
+				blockTime: blockData.get(blockNumber) ?? new Date(0),
+				marketId: args.marketId.toString(),
+				signer: args.signer,
+				bundleRef: args.bundleRef
+			})
+		}
 
-			const market = (await publicClient.readContract({
-				address: deployment.market,
-				abi: marketAbi,
-				functionName: 'get',
-				args: [args.marketId]
-			})) as {
-				verdict: { outcome: number; confidence: bigint; verdictHash: `0x${string}` }
-				resolvedAt: bigint
-			}
-
+		const dbTransactions: DbTransaction[] = []
+		if (rows.length > 0) {
 			dbTransactions.push(
-				prisma.verdict.upsert({
-					where: { marketId: args.marketId },
-					create: {
-						marketId: args.marketId,
-						outcome: market.verdict.outcome,
-						confidence: market.verdict.confidence.toString(),
-						verdictHash: market.verdict.verdictHash,
-						bundleRef: args.bundleRef,
-						signer: args.signer,
-						postedAt: new Date(Number(market.resolvedAt) * 1000),
-						postedAtBlock: blockNumber
-					},
-					update: {
-						outcome: market.verdict.outcome,
-						confidence: market.verdict.confidence.toString(),
-						verdictHash: market.verdict.verdictHash,
-						bundleRef: args.bundleRef,
-						signer: args.signer,
-						postedAtBlock: blockNumber
-					}
+				prisma.eventLogs_VerdictPosted.createMany({
+					data: rows,
+					skipDuplicates: true
 				})
 			)
 		}
-
 		dbTransactions.push(saveLastSyncBlockTransaction(SYNC_KEY, windowTo))
 
 		await bulkUpdateDbTransactions(
 			dbTransactions,
-			`[Logs] VerdictPosted ${windowFrom}-${windowTo} size: ${logs.length}`
+			`[Logs] VerdictPosted ${windowFrom}-${windowTo} size: ${rows.length}`
 		)
 	})
 }

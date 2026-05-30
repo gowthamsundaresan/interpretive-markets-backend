@@ -12,8 +12,6 @@ export interface Env {
 	WATCHER_PRIVATE_KEY: `0x${string}`
 	EIGENAI_API_KEY: string
 	EIGENAI_BASE_URL: string
-	CRON_INTERVAL: string
-	LOG_LEVEL: string
 }
 
 let cached: Env | null = null
@@ -29,9 +27,7 @@ export function loadEnv(): Env {
 		DEPLOYMENT_FILE: required('DEPLOYMENT_FILE'),
 		WATCHER_PRIVATE_KEY: required('WATCHER_PRIVATE_KEY') as `0x${string}`,
 		EIGENAI_API_KEY: required('EIGENAI_API_KEY'),
-		EIGENAI_BASE_URL: process.env.EIGENAI_BASE_URL ?? 'https://eigenai.eigencloud.xyz/v1',
-		CRON_INTERVAL: process.env.CRON_INTERVAL ?? '*/60 * * * * *',
-		LOG_LEVEL: process.env.LOG_LEVEL ?? 'info'
+		EIGENAI_BASE_URL: process.env.EIGENAI_BASE_URL ?? 'https://eigenai.eigencloud.xyz/v1'
 	}
 	return cached
 }

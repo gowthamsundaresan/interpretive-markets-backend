@@ -7,6 +7,7 @@ import { prisma } from '../utils/prismaClient'
 import {
 	bulkUpdateDbTransactions,
 	fetchLastSyncBlock,
+	getBlockDataFromDb,
 	loopThroughBlocks,
 	saveLastSyncBlockTransaction,
 	type DbTransaction
@@ -38,61 +39,60 @@ export async function seedLogsMarketCreated(
 			toBlock: windowTo
 		})
 
-		const dbTransactions: DbTransaction[] = []
+		const blockData = await getBlockDataFromDb(windowFrom, windowTo)
+		const rows: {
+			address: string
+			transactionHash: string
+			transactionIndex: number
+			blockNumber: bigint
+			blockHash: string
+			blockTime: Date
+			marketId: string
+			frameworkId: string
+			judgeImageDigest: string
+			creator: string
+		}[] = []
 
 		for (const log of logs) {
 			const args = (
 				log as unknown as {
-					args: { marketId: bigint }
+					args: {
+						marketId: bigint
+						frameworkId: `0x${string}`
+						judgeImageDigest: `0x${string}`
+						creator: `0x${string}`
+					}
 				}
 			).args
 			const blockNumber = log.blockNumber ?? 0n
+			rows.push({
+				address: log.address,
+				transactionHash: log.transactionHash ?? '',
+				transactionIndex: log.logIndex ?? 0,
+				blockNumber,
+				blockHash: log.blockHash ?? '',
+				blockTime: blockData.get(blockNumber) ?? new Date(0),
+				marketId: args.marketId.toString(),
+				frameworkId: args.frameworkId,
+				judgeImageDigest: args.judgeImageDigest,
+				creator: args.creator
+			})
+		}
 
-			const m = (await publicClient.readContract({
-				address: deployment.market,
-				abi: marketAbi,
-				functionName: 'get',
-				args: [args.marketId]
-			})) as {
-				init: {
-					question: string
-					frameworkId: `0x${string}`
-					dataSourceSpec: `0x${string}`
-					modelId: `0x${string}`
-					promptTemplateHash: `0x${string}`
-					resolutionTime: bigint
-					judgeImageDigest: `0x${string}`
-				}
-				creator: `0x${string}`
-				createdAt: bigint
-			}
-
+		const dbTransactions: DbTransaction[] = []
+		if (rows.length > 0) {
 			dbTransactions.push(
-				prisma.market.upsert({
-					where: { id: args.marketId },
-					create: {
-						id: args.marketId,
-						question: m.init.question,
-						frameworkId: m.init.frameworkId,
-						judgeDigest: m.init.judgeImageDigest,
-						modelId: m.init.modelId,
-						promptTemplateHash: m.init.promptTemplateHash,
-						dataSourceSpec: Buffer.from(m.init.dataSourceSpec.slice(2), 'hex'),
-						resolutionTime: new Date(Number(m.init.resolutionTime) * 1000),
-						creator: m.creator,
-						createdAt: new Date(Number(m.createdAt) * 1000),
-						createdAtBlock: blockNumber
-					},
-					update: { createdAtBlock: blockNumber }
+				prisma.eventLogs_MarketCreated.createMany({
+					data: rows,
+					skipDuplicates: true
 				})
 			)
 		}
-
 		dbTransactions.push(saveLastSyncBlockTransaction(SYNC_KEY, windowTo))
 
 		await bulkUpdateDbTransactions(
 			dbTransactions,
-			`[Logs] MarketCreated ${windowFrom}-${windowTo} size: ${logs.length}`
+			`[Logs] MarketCreated ${windowFrom}-${windowTo} size: ${rows.length}`
 		)
 	})
 }

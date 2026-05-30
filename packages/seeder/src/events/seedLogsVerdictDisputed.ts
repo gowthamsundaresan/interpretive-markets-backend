@@ -1,5 +1,5 @@
 import { marketAbi } from '@interpretive/shared'
-import { getAbiItem, type AbiEvent } from 'viem'
+import { getAbiItem, toHex, type AbiEvent } from 'viem'
 
 import { loadDeployment } from '../data/address'
 import { loadEnv } from '../utils/env'
@@ -7,6 +7,7 @@ import { prisma } from '../utils/prismaClient'
 import {
 	bulkUpdateDbTransactions,
 	fetchLastSyncBlock,
+	getBlockDataFromDb,
 	loopThroughBlocks,
 	saveLastSyncBlockTransaction,
 	type DbTransaction
@@ -38,29 +39,55 @@ export async function seedLogsVerdictDisputed(
 			toBlock: windowTo
 		})
 
-		const dbTransactions: DbTransaction[] = []
+		const blockData = await getBlockDataFromDb(windowFrom, windowTo)
+		const rows: {
+			address: string
+			transactionHash: string
+			transactionIndex: number
+			blockNumber: bigint
+			blockHash: string
+			blockTime: Date
+			marketId: string
+			disputer: string
+			evidence: string
+		}[] = []
 
 		for (const log of logs) {
-			const args = (log as unknown as { args: { marketId: bigint } }).args
+			const args = (
+				log as unknown as {
+					args: { marketId: bigint; disputer: `0x${string}`; evidence: `0x${string}` }
+				}
+			).args
 			const blockNumber = log.blockNumber ?? 0n
+			rows.push({
+				address: log.address,
+				transactionHash: log.transactionHash ?? '',
+				transactionIndex: log.logIndex ?? 0,
+				blockNumber,
+				blockHash: log.blockHash ?? '',
+				blockTime: blockData.get(blockNumber) ?? new Date(0),
+				marketId: args.marketId.toString(),
+				disputer: args.disputer,
+				evidence: args.evidence
+			})
+		}
 
+		const dbTransactions: DbTransaction[] = []
+		if (rows.length > 0) {
 			dbTransactions.push(
-				prisma.verdict.update({
-					where: { marketId: args.marketId },
-					data: {
-						disputed: true,
-						disputedAt: new Date(),
-						disputedAtBlock: blockNumber
-					}
+				prisma.eventLogs_VerdictDisputed.createMany({
+					data: rows,
+					skipDuplicates: true
 				})
 			)
 		}
-
 		dbTransactions.push(saveLastSyncBlockTransaction(SYNC_KEY, windowTo))
 
 		await bulkUpdateDbTransactions(
 			dbTransactions,
-			`[Logs] VerdictDisputed ${windowFrom}-${windowTo} size: ${logs.length}`
+			`[Logs] VerdictDisputed ${windowFrom}-${windowTo} size: ${rows.length}`
 		)
+
+		void toHex
 	})
 }

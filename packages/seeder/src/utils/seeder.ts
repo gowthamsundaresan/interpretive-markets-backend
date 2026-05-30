@@ -57,10 +57,30 @@ export async function fetchLastSyncBlock(key: string, fallback: bigint): Promise
 	return fallback
 }
 
+export async function saveLastSyncBlock(key: string, blockNumber: bigint): Promise<void> {
+	await prisma.setting.upsert({
+		where: { key },
+		create: { key, value: blockNumber.toString() },
+		update: { value: blockNumber.toString() }
+	})
+}
+
 export function saveLastSyncBlockTransaction(key: string, blockNumber: bigint): DbTransaction {
 	return prisma.setting.upsert({
 		where: { key },
 		create: { key, value: blockNumber.toString() },
 		update: { value: blockNumber.toString() }
 	})
+}
+
+export async function getBlockDataFromDb(
+	fromBlock: bigint,
+	toBlock: bigint
+): Promise<Map<bigint, Date>> {
+	const rows = await prisma.evm_BlockData.findMany({
+		where: { number: { gte: fromBlock, lte: toBlock } },
+		select: { number: true, timestamp: true },
+		orderBy: { number: 'asc' }
+	})
+	return new Map(rows.map((r) => [r.number, r.timestamp]))
 }

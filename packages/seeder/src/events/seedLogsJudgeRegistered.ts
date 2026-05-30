@@ -7,6 +7,7 @@ import { prisma } from '../utils/prismaClient'
 import {
 	bulkUpdateDbTransactions,
 	fetchLastSyncBlock,
+	getBlockDataFromDb,
 	loopThroughBlocks,
 	saveLastSyncBlockTransaction,
 	type DbTransaction
@@ -38,39 +39,49 @@ export async function seedLogsJudgeRegistered(
 			toBlock: windowTo
 		})
 
-		const dbTransactions: DbTransaction[] = []
+		const blockData = await getBlockDataFromDb(windowFrom, windowTo)
+		const rows: {
+			address: string
+			transactionHash: string
+			transactionIndex: number
+			blockNumber: bigint
+			blockHash: string
+			blockTime: Date
+			imageDigest: string
+			signer: string
+		}[] = []
 
 		for (const log of logs) {
 			const args = (
-				log as unknown as {
-					args: { imageDigest: `0x${string}`; signer: `0x${string}` }
-				}
+				log as unknown as { args: { imageDigest: `0x${string}`; signer: `0x${string}` } }
 			).args
 			const blockNumber = log.blockNumber ?? 0n
+			rows.push({
+				address: log.address,
+				transactionHash: log.transactionHash ?? '',
+				transactionIndex: log.logIndex ?? 0,
+				blockNumber,
+				blockHash: log.blockHash ?? '',
+				blockTime: blockData.get(blockNumber) ?? new Date(0),
+				imageDigest: args.imageDigest,
+				signer: args.signer
+			})
+		}
 
+		const dbTransactions: DbTransaction[] = []
+		if (rows.length > 0) {
 			dbTransactions.push(
-				prisma.judge.upsert({
-					where: { imageDigest: args.imageDigest },
-					create: {
-						imageDigest: args.imageDigest,
-						signer: args.signer,
-						enabled: true,
-						registeredAt: new Date(),
-						registeredAtBlock: blockNumber
-					},
-					update: {
-						signer: args.signer,
-						registeredAtBlock: blockNumber
-					}
+				prisma.eventLogs_JudgeRegistered.createMany({
+					data: rows,
+					skipDuplicates: true
 				})
 			)
 		}
-
 		dbTransactions.push(saveLastSyncBlockTransaction(SYNC_KEY, windowTo))
 
 		await bulkUpdateDbTransactions(
 			dbTransactions,
-			`[Logs] JudgeRegistered ${windowFrom}-${windowTo} size: ${logs.length}`
+			`[Logs] JudgeRegistered ${windowFrom}-${windowTo} size: ${rows.length}`
 		)
 	})
 }

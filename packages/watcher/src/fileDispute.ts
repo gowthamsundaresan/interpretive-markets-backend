@@ -1,9 +1,8 @@
 import { marketAbi } from '@interpretive/shared'
-import { encodeAbiParameters, toHex } from 'viem'
+import { encodeAbiParameters } from 'viem'
 
 import { loadDeployment } from './data/address/index'
 import { loadEnv } from './utils/env'
-import { logger } from './utils/logger'
 import { getClients } from './utils/viemClient'
 
 // --- Core functions ---
@@ -25,9 +24,8 @@ export async function fileDispute(args: {
 		[args.counterHash, args.reason]
 	)
 
-	logger.info(
-		{ marketId: args.marketId.toString(), counterHash: args.counterHash, reason: args.reason },
-		'filing dispute'
+	console.log(
+		`[Dispute] filing market=${args.marketId} counter=${args.counterHash} reason=${args.reason}`
 	)
 
 	const { request } = await publicClient.simulateContract({
@@ -39,7 +37,5 @@ export async function fileDispute(args: {
 	})
 
 	const txHash = await walletClient.writeContract(request)
-	logger.info({ marketId: args.marketId.toString(), txHash }, 'dispute filed')
-	// txHash is already 0x-prefixed; toHex is a no-op safety net
-	void toHex
+	console.log(`[Dispute] filed market=${args.marketId} tx=${txHash}`)
 }

@@ -1,47 +1,35 @@
-import cron from 'node-cron'
+import 'dotenv/config'
 
 import { checkPendingVerdicts } from './checkVerdicts'
 import { loadEnv } from './utils/env'
-import { logger } from './utils/logger'
+
+console.log('Initializing Watcher ...')
 
 // --- Core functions ---
 
-let running = false
+const UPDATE_FREQUENCY = 60
 
-async function tick() {
-	if (running) {
-		logger.warn('previous tick still running, skipping')
-		return
-	}
-	running = true
-	const start = Date.now()
-	try {
-		await checkPendingVerdicts()
-		logger.info({ ms: Date.now() - start }, 'tick done')
-	} catch (err) {
-		logger.error({ err }, 'tick failed')
-	} finally {
-		running = false
+function delay(seconds: number) {
+	return new Promise((resolve) => setTimeout(resolve, seconds * 1000))
+}
+
+async function watchAll() {
+	while (true) {
+		try {
+			console.log(`\nChecking pending verdicts, every ${UPDATE_FREQUENCY} seconds:`)
+			console.time('Watched verdicts in')
+
+			await checkPendingVerdicts()
+
+			console.timeEnd('Watched verdicts in')
+		} catch (error) {
+			console.log('Failed to check verdicts at:', Date.now())
+			console.log(error)
+		}
+
+		await delay(UPDATE_FREQUENCY)
 	}
 }
 
-async function main() {
-	const env = loadEnv()
-	const once = process.argv.includes('--once')
-
-	if (once) {
-		await tick()
-		process.exit(0)
-	}
-
-	logger.info({ network: env.NETWORK, cron: env.CRON_INTERVAL }, 'watcher starting')
-	cron.schedule(env.CRON_INTERVAL, () => {
-		void tick()
-	})
-	await tick()
-}
-
-main().catch((err) => {
-	logger.error({ err }, 'fatal')
-	process.exit(1)
-})
+loadEnv()
+watchAll()
