@@ -1,0 +1,23 @@
+{
+	"name": "@interpretive/shared",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
+	"scripts": {
+		"build": "tsc",
+		"gen:abis": "tsx ./scripts/genAbis.ts"
+	},
+	"dependencies": {
+		"openai": "^4.73.0",
+		"tar": "^7.4.3",
+		"viem": "^2.21.0"
+	},
+	"devDependencies": {
+		"@types/node": "^20.12.2",
+		"@types/tar": "^6.1.13",
+		"tsx": "^4.7.1",
+		"typescript": "^5.4.3"
+	}
+}

@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// Frameworks registered on-chain.
+model Framework {
+  id                String   @id // sha256 of the tarball, 0x-prefixed
+  uri               String
+  author            String
+  metadata          Bytes
+  registeredAt      DateTime
+  registeredAtBlock BigInt   @default(0)
+
+  markets Market[]
+
+  createdAt DateTime @default(now())
+}
+
+// Judges (EigenCompute images) authorized to resolve markets.
+model Judge {
+  imageDigest       String   @id // 0x-prefixed bytes32
+  signer            String
+  enabled           Boolean  @default(true)
+  registeredAt      DateTime
+  registeredAtBlock BigInt   @default(0)
+
+  markets Market[]
+
+  createdAt DateTime @default(now())
+}
+
+// Interpretive markets.
+model Market {
+  id                 BigInt    @id
+  question           String
+  frameworkId        String
+  framework          Framework @relation(fields: [frameworkId], references: [id])
+  judgeDigest        String
+  judge              Judge     @relation(fields: [judgeDigest], references: [imageDigest])
+  modelId            String
+  promptTemplateHash String
+  dataSourceSpec     Bytes
+  resolutionTime     DateTime
+  creator            String
+  createdAt          DateTime  @default(now())
+  createdAtBlock     BigInt    @default(0)
+
+  verdict Verdict?
+}
+
+enum ReExecStatus {
+  pending
+  verified
+  disputed
+}
+
+// Verdict posted on-chain for a market.
+model Verdict {
+  marketId      BigInt   @id
+  market        Market   @relation(fields: [marketId], references: [id])
+  outcome       Int
+  confidence    String // 1e18-scaled, stored as decimal string to avoid float loss
+  verdictHash   String
+  bundleRef     String
+  signer        String
+  postedAt      DateTime
+  postedAtBlock BigInt   @default(0)
+
+  reExecStatus    ReExecStatus @default(pending)
+  reExecCheckedAt DateTime?
+  reExecHash      String? // sha256 of the re-executed bytes (for the dispute path)
+  disputed        Boolean      @default(false)
+  disputedAt      DateTime?
+  disputedAtBlock BigInt?
+
+  bundle ReExecBundle?
+}
+
+// Re-execution bundle stored on EigenDA + IPFS, referenced by the verdict.
+model ReExecBundle {
+  marketId       BigInt    @id
+  verdict        Verdict   @relation(fields: [marketId], references: [marketId])
+  ipfsCid        String
+  eigenDABlobKey String?
+  sizeBytes      Int
+  fetchedAt      DateTime?
+
+  createdAt DateTime @default(now())
+}
