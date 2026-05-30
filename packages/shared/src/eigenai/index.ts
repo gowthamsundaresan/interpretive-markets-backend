@@ -1,2 +1,2 @@
-export * from './client.js'
-export * from './prompt.js'
+export * from './client'
+export * from './prompt'

@@ -1,5 +1,5 @@
-import { sha256 } from '../content/hash.js'
-import type { FrameworkPromptTemplate } from '../types/framework.js'
+import { sha256 } from '../content/hash'
+import type { FrameworkPromptTemplate } from '../types/framework'
 
 // --- Types ---
 

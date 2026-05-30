@@ -1,3 +1,3 @@
-export { frameworkRegistryAbi } from './frameworkRegistry.js'
-export { judgeRegistryAbi } from './judgeRegistry.js'
-export { marketAbi } from './market.js'
+export { frameworkRegistryAbi } from './frameworkRegistry'
+export { judgeRegistryAbi } from './judgeRegistry'
+export { marketAbi } from './market'

@@ -4,7 +4,7 @@ import { join } from 'node:path'
 
 import { create as createTar, extract as extractTar } from 'tar'
 
-import { sha256 } from './hash.js'
+import { sha256 } from './hash'
 
 // --- Types ---
 

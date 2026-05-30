@@ -1,5 +1,5 @@
-import { ListMarketsQuerySchema, MarketParamsSchema } from '../../schema/markets.js'
-import { getMarket, getMarketVerdict, listMarkets } from './marketsController.js'
+import { ListMarketsQuerySchema, MarketParamsSchema } from '../../schema/markets'
+import { getMarket, getMarketVerdict, listMarkets } from './marketsController'
 import type { FastifyInstance } from 'fastify'
 
 // --- Core functions ---

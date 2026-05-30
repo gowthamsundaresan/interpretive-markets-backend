@@ -1,62 +1,57 @@
-import cron from 'node-cron'
+import 'dotenv/config'
 
-import { getChainHead } from './blocks/seedBlockData.js'
-import { seedLogsFrameworkRegistered } from './events/seedLogsFrameworkRegistered.js'
-import { seedLogsJudgeEnabledSet } from './events/seedLogsJudgeEnabledSet.js'
-import { seedLogsJudgeRegistered } from './events/seedLogsJudgeRegistered.js'
-import { seedLogsMarketCreated } from './events/seedLogsMarketCreated.js'
-import { seedLogsVerdictDisputed } from './events/seedLogsVerdictDisputed.js'
-import { seedLogsVerdictPosted } from './events/seedLogsVerdictPosted.js'
-import { loadEnv } from './utils/env.js'
-import { logger } from './utils/logger.js'
+import { seedLogsFrameworkRegistered } from './events/seedLogsFrameworkRegistered'
+import { seedLogsJudgeEnabledSet } from './events/seedLogsJudgeEnabledSet'
+import { seedLogsJudgeRegistered } from './events/seedLogsJudgeRegistered'
+import { seedLogsMarketCreated } from './events/seedLogsMarketCreated'
+import { seedLogsVerdictDisputed } from './events/seedLogsVerdictDisputed'
+import { seedLogsVerdictPosted } from './events/seedLogsVerdictPosted'
+import { loadEnv } from './utils/env'
+import { getPublicClient } from './utils/viemClient'
+
+console.log('Initializing Seeder ...')
 
 // --- Core functions ---
 
-let running = false
+const UPDATE_FREQUENCY = 30
 
-async function tick() {
-	if (running) {
-		logger.warn('previous tick still running, skipping')
-		return
-	}
-	running = true
-	const start = Date.now()
-	try {
-		const head = await getChainHead()
-		logger.info({ head: head.toString() }, 'tick begin')
+function delay(seconds: number) {
+	return new Promise((resolve) => setTimeout(resolve, seconds * 1000))
+}
 
-		await seedLogsFrameworkRegistered(head)
-		await seedLogsJudgeRegistered(head)
-		await seedLogsJudgeEnabledSet(head)
-		await seedLogsMarketCreated(head)
-		await seedLogsVerdictPosted(head)
-		await seedLogsVerdictDisputed(head)
+async function seedAll() {
+	while (true) {
+		try {
+			const publicClient = getPublicClient()
+			const targetBlock = await publicClient.getBlockNumber()
+			console.log(
+				`\nSeeding data, every ${UPDATE_FREQUENCY} seconds, till block ${targetBlock}:`
+			)
+			console.time('Seeded data in')
 
-		logger.info({ ms: Date.now() - start }, 'tick done')
-	} catch (err) {
-		logger.error({ err }, 'tick failed')
-	} finally {
-		running = false
+			// Registries first — markets depend on framework + judge rows
+			await Promise.all([
+				seedLogsFrameworkRegistered(targetBlock),
+				seedLogsJudgeRegistered(targetBlock)
+			])
+
+			// Mutations on existing rows
+			await seedLogsJudgeEnabledSet(targetBlock)
+
+			// Market lifecycle: created → resolved → disputed
+			await seedLogsMarketCreated(targetBlock)
+			await seedLogsVerdictPosted(targetBlock)
+			await seedLogsVerdictDisputed(targetBlock)
+
+			console.timeEnd('Seeded data in')
+		} catch (error) {
+			console.log('Failed to seed data at:', Date.now())
+			console.log(error)
+		}
+
+		await delay(UPDATE_FREQUENCY)
 	}
 }
 
-async function main() {
-	const env = loadEnv()
-	const once = process.argv.includes('--once')
-
-	if (once) {
-		await tick()
-		process.exit(0)
-	}
-
-	logger.info({ network: env.NETWORK, cron: env.CRON_INTERVAL }, 'seeder starting')
-	cron.schedule(env.CRON_INTERVAL, () => {
-		void tick()
-	})
-	await tick() // run once immediately
-}
-
-main().catch((err) => {
-	logger.error({ err }, 'fatal')
-	process.exit(1)
-})
+loadEnv()
+seedAll()

@@ -1,48 +1,62 @@
 import { judgeRegistryAbi } from '@interpretive/shared'
 import { getAbiItem, type AbiEvent } from 'viem'
 
-import { loadDeployment } from '../data/address/index.js'
-import { loadEnv } from '../utils/env.js'
-import { logger } from '../utils/logger.js'
-import { prisma } from '../utils/prismaClient.js'
-import { getPublicClient } from '../utils/viemClient.js'
-import { openCursorWindow, withRetry } from '../utils/seeder.js'
+import { loadDeployment } from '../data/address'
+import { loadEnv } from '../utils/env'
+import { prisma } from '../utils/prismaClient'
+import {
+	bulkUpdateDbTransactions,
+	fetchLastSyncBlock,
+	loopThroughBlocks,
+	saveLastSyncBlockTransaction,
+	type DbTransaction
+} from '../utils/seeder'
+import { getPublicClient } from '../utils/viemClient'
+
+const SYNC_KEY = 'lastSyncedBlock_logs_judge_enabled_set'
 
 // --- Core functions ---
 
-export async function seedLogsJudgeEnabledSet(chainHead: bigint): Promise<void> {
+export async function seedLogsJudgeEnabledSet(
+	toBlock?: bigint,
+	fromBlock?: bigint
+): Promise<void> {
 	const env = loadEnv()
 	const deployment = loadDeployment(env.DEPLOYMENT_FILE)
 	const publicClient = getPublicClient()
 
-	const window = await openCursorWindow({
-		key: 'JudgeRegistry.JudgeEnabledSet',
-		fallbackFromBlock: env.START_BLOCK,
-		chainHead
-	})
-	if (!window) return
+	const firstBlock = fromBlock ?? (await fetchLastSyncBlock(SYNC_KEY, env.START_BLOCK))
+	const lastBlock = toBlock ?? (await publicClient.getBlockNumber())
 
 	const event = getAbiItem({ abi: judgeRegistryAbi, name: 'JudgeEnabledSet' }) as AbiEvent
 
-	const logs = await withRetry('getLogs JudgeEnabledSet', () =>
-		publicClient.getLogs({
+	await loopThroughBlocks(firstBlock, lastBlock, async (windowFrom, windowTo) => {
+		const logs = await publicClient.getLogs({
 			address: deployment.judgeRegistry,
 			event,
-			fromBlock: window.fromBlock,
-			toBlock: window.toBlock
+			fromBlock: windowFrom,
+			toBlock: windowTo
 		})
-	)
 
-	for (const log of logs) {
-		const { imageDigest, enabled } = (
-			log as unknown as { args: { imageDigest: `0x${string}`; enabled: boolean } }
-		).args
-		await prisma.judge.update({
-			where: { imageDigest },
-			data: { enabled }
-		})
-		logger.info({ imageDigest, enabled }, 'indexing JudgeEnabledSet')
-	}
+		const dbTransactions: DbTransaction[] = []
 
-	await window.advance(window.toBlock)
+		for (const log of logs) {
+			const { imageDigest, enabled } = (
+				log as unknown as { args: { imageDigest: `0x${string}`; enabled: boolean } }
+			).args
+			dbTransactions.push(
+				prisma.judge.update({
+					where: { imageDigest },
+					data: { enabled }
+				})
+			)
+		}
+
+		dbTransactions.push(saveLastSyncBlockTransaction(SYNC_KEY, windowTo))
+
+		await bulkUpdateDbTransactions(
+			dbTransactions,
+			`[Logs] JudgeEnabledSet ${windowFrom}-${windowTo} size: ${logs.length}`
+		)
+	})
 }

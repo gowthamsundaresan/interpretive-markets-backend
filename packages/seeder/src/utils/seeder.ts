@@ -1,64 +1,66 @@
-import { prisma } from './prismaClient.js'
+import type { Prisma } from '@interpretive/prisma'
+
+import { chunkArray } from './array'
+import { prisma } from './prismaClient'
 
 // --- Types ---
 
-export interface BlockRange {
-	fromBlock: bigint
-	toBlock: bigint
-}
+export type DbTransaction = Prisma.PrismaPromise<unknown>
 
-export interface CursorWindow {
-	fromBlock: bigint
-	toBlock: bigint
-	advance: (newCursor: bigint) => Promise<void>
-}
-
-const CHUNK_SIZE = 4_000n // safe for free RPC providers (often capped at 5k logs / 10k blocks)
+const BLOCK_BATCH_SIZE = 4999n
+const DB_BATCH_SIZE = 1000
 
 // --- Core functions ---
 
-export async function openCursorWindow(args: {
-	key: string
-	fallbackFromBlock: bigint
-	chainHead: bigint
-}): Promise<CursorWindow | null> {
-	const cursor = await prisma.blockCursor.upsert({
-		where: { key: args.key },
-		create: { key: args.key, lastBlock: args.fallbackFromBlock },
-		update: {}
+export async function loopThroughBlocks(
+	firstBlock: bigint,
+	lastBlock: bigint,
+	cb: (fromBlock: bigint, toBlock: bigint) => Promise<void>,
+	batchSize: bigint = BLOCK_BATCH_SIZE
+): Promise<bigint> {
+	let currentBlock = firstBlock
+	let nextBlock = firstBlock
+
+	while (nextBlock < lastBlock) {
+		nextBlock = currentBlock + batchSize
+		if (nextBlock >= lastBlock) nextBlock = lastBlock
+
+		await cb(currentBlock, nextBlock)
+
+		currentBlock = nextBlock
+	}
+
+	return lastBlock
+}
+
+export async function bulkUpdateDbTransactions(
+	dbTransactions: DbTransaction[],
+	label?: string
+): Promise<void> {
+	if (dbTransactions.length === 0) return
+
+	console.time(`[DB Write (${dbTransactions.length})] ${label || ''}`)
+
+	for (const chunk of chunkArray(dbTransactions, DB_BATCH_SIZE)) {
+		await prisma.$transaction(chunk)
+	}
+
+	console.timeEnd(`[DB Write (${dbTransactions.length})] ${label || ''}`)
+}
+
+export async function fetchLastSyncBlock(key: string, fallback: bigint): Promise<bigint> {
+	const row = await prisma.setting.findUnique({ where: { key } })
+	if (!row) return fallback
+	const v = row.value as unknown
+	if (typeof v === 'string') return BigInt(v)
+	if (typeof v === 'number') return BigInt(v)
+	return fallback
+}
+
+export function saveLastSyncBlockTransaction(key: string, blockNumber: bigint): DbTransaction {
+	return prisma.setting.upsert({
+		where: { key },
+		create: { key, value: blockNumber.toString() },
+		update: { value: blockNumber.toString() }
 	})
-
-	const fromBlock = cursor.lastBlock > args.fallbackFromBlock ? cursor.lastBlock + 1n : args.fallbackFromBlock
-	if (fromBlock > args.chainHead) return null
-
-	const toBlock = fromBlock + CHUNK_SIZE > args.chainHead ? args.chainHead : fromBlock + CHUNK_SIZE - 1n
-	return {
-		fromBlock,
-		toBlock,
-		advance: async (newCursor) => {
-			await prisma.blockCursor.update({
-				where: { key: args.key },
-				data: { lastBlock: newCursor }
-			})
-		}
-	}
-}
-
-export async function withRetry<T>(label: string, fn: () => Promise<T>, attempts = 3): Promise<T> {
-	let lastErr: unknown
-	for (let i = 0; i < attempts; i++) {
-		try {
-			return await fn()
-		} catch (err) {
-			lastErr = err
-			await sleep(500 * Math.pow(2, i))
-		}
-	}
-	throw new Error(`${label} failed after ${attempts} attempts: ${String(lastErr)}`)
-}
-
-// --- Helper functions ---
-
-function sleep(ms: number): Promise<void> {
-	return new Promise((r) => setTimeout(r, ms))
 }

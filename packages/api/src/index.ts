@@ -4,13 +4,13 @@ import fastifyEnv from '@fastify/env'
 import fastify from 'fastify'
 import fastifyPlugin from 'fastify-plugin'
 
-import { API_VERSION } from './constants.js'
-import { cacheHook } from './hooks/cache.js'
-import { rateLimitHook } from './hooks/rateLimit.js'
-import { register as registerFrameworks } from './routes/frameworks/frameworksRoutes.js'
-import { register as registerJudges } from './routes/judges/judgesRoutes.js'
-import { register as registerMarkets } from './routes/markets/marketsRoutes.js'
-import { envSchema } from './schema/env.js'
+import { API_VERSION } from './constants'
+import { cacheHook } from './hooks/cache'
+import { rateLimitHook } from './hooks/rateLimit'
+import { register as registerFrameworks } from './routes/frameworks/frameworksRoutes'
+import { register as registerJudges } from './routes/judges/judgesRoutes'
+import { register as registerMarkets } from './routes/markets/marketsRoutes'
+import { envSchema } from './schema/env'
 
 // --- Core functions ---
 

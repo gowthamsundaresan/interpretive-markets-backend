@@ -1,6 +1,6 @@
-import { sendError } from '../../schema/errors.js'
-import { prisma } from '../../utils/prismaClient.js'
-import { serialize } from '../../utils/serialize.js'
+import { sendError } from '../../schema/errors'
+import { prisma } from '../../utils/prismaClient'
+import { serialize } from '../../utils/serialize'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
 // --- Core functions ---

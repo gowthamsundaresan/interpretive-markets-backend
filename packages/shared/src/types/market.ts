@@ -1,4 +1,4 @@
-import type { FrameworkId } from './framework.js'
+import type { FrameworkId } from './framework'
 
 // --- Types ---
 

@@ -1,4 +1,4 @@
-import { getPublicClient } from '../utils/viemClient.js'
+import { getPublicClient } from '../utils/viemClient'
 
 // --- Core functions ---
 

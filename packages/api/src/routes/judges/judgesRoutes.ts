@@ -1,5 +1,5 @@
-import { JudgeParamsSchema } from '../../schema/judges.js'
-import { getJudge, listJudges } from './judgesController.js'
+import { JudgeParamsSchema } from '../../schema/judges'
+import { getJudge, listJudges } from './judgesController'
 import type { FastifyInstance } from 'fastify'
 
 // --- Core functions ---

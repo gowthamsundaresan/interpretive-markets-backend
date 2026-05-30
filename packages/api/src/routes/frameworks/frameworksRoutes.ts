@@ -1,5 +1,5 @@
-import { FrameworkParamsSchema, ListFrameworksQuerySchema } from '../../schema/frameworks.js'
-import { getFramework, listFrameworks } from './frameworksController.js'
+import { FrameworkParamsSchema, ListFrameworksQuerySchema } from '../../schema/frameworks'
+import { getFramework, listFrameworks } from './frameworksController'
 import type { FastifyInstance } from 'fastify'
 
 // --- Core functions ---

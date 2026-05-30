@@ -1,3 +1,3 @@
-export * from './hash.js'
-export * from './tarball.js'
-export * from './ipfs.js'
+export * from './hash'
+export * from './tarball'
+export * from './ipfs'
