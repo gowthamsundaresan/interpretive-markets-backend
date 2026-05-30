@@ -14,7 +14,6 @@ const ENABLED_LOGS_KEY = 'lastSyncedBlock_logs_judge_enabled_set'
 
 // --- Core functions ---
 
-// Reads EventLogs_JudgeRegistered + EventLogs_JudgeEnabledSet → Judge table
 export async function seedJudges(toBlock?: bigint, fromBlock?: bigint): Promise<void> {
 	const env = loadEnv()
 

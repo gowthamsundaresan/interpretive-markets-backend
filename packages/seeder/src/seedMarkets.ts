@@ -17,7 +17,6 @@ const LOGS_SYNC_KEY = 'lastSyncedBlock_logs_market_created'
 
 // --- Core functions ---
 
-// Reads EventLogs_MarketCreated → Market table (with readContract for full params)
 export async function seedMarkets(toBlock?: bigint, fromBlock?: bigint): Promise<void> {
 	const env = loadEnv()
 	const deployment = loadDeployment(env.DEPLOYMENT_FILE)

@@ -8,9 +8,8 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// Frameworks registered on-chain.
 model Framework {
-  id                String   @id // sha256 of the tarball, 0x-prefixed
+  id                String   @id
   uri               String
   author            String
   metadata          Bytes
@@ -22,9 +21,8 @@ model Framework {
   createdAt DateTime @default(now())
 }
 
-// Judges (EigenCompute images) authorized to resolve markets.
 model Judge {
-  imageDigest       String   @id // 0x-prefixed bytes32
+  imageDigest       String   @id
   signer            String
   enabled           Boolean  @default(true)
   registeredAt      DateTime
@@ -35,7 +33,6 @@ model Judge {
   createdAt DateTime @default(now())
 }
 
-// Interpretive markets.
 model Market {
   id                 BigInt    @id
   question           String
@@ -60,12 +57,12 @@ enum ReExecStatus {
   disputed
 }
 
-// Verdict posted on-chain for a market.
 model Verdict {
   marketId      BigInt   @id
   market        Market   @relation(fields: [marketId], references: [id])
   outcome       Int
-  confidence    String // 1e18-scaled, stored as decimal string to avoid float loss
+  // 1e18-scaled, stored as decimal string to avoid float loss
+  confidence    String
   verdictHash   String
   bundleRef     String
   signer        String
@@ -74,7 +71,7 @@ model Verdict {
 
   reExecStatus    ReExecStatus @default(pending)
   reExecCheckedAt DateTime?
-  reExecHash      String? // sha256 of the re-executed bytes (for the dispute path)
+  reExecHash      String?
   disputed        Boolean      @default(false)
   disputedAt      DateTime?
   disputedAtBlock BigInt?
@@ -82,7 +79,6 @@ model Verdict {
   bundle ReExecBundle?
 }
 
-// Re-execution bundle stored on EigenDA + IPFS, referenced by the verdict.
 model ReExecBundle {
   marketId       BigInt    @id
   verdict        Verdict   @relation(fields: [marketId], references: [marketId])
@@ -94,21 +90,16 @@ model ReExecBundle {
   createdAt DateTime @default(now())
 }
 
-// Generic key/value settings — used for per-event sync cursors (key e.g.
-// "lastSyncedBlock_logs_market_verdict_posted"), schema version, feature flags, etc.
 model Setting {
   key       String   @id
   value     Json
   updatedAt DateTime @updatedAt
 }
 
-// Block timestamp cache — populated by seedBlockData, read by event seeders.
 model Evm_BlockData {
   number    BigInt   @id
   timestamp DateTime
 }
-
-// --- Raw event log archives (1:1 with on-chain events) ---
 
 model EventLogs_FrameworkRegistered {
   address          String

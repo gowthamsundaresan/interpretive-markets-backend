@@ -1,6 +1,5 @@
 // --- Core functions ---
 
-// Recursively converts BigInt to string and Buffer to 0x-hex for JSON responses.
 export function serialize<T>(value: T): unknown {
 	if (typeof value === 'bigint') return value.toString()
 	if (Buffer.isBuffer(value)) return `0x${value.toString('hex')}`

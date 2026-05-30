@@ -13,7 +13,6 @@ const LOGS_SYNC_KEY = 'lastSyncedBlock_logs_framework_registered'
 
 // --- Core functions ---
 
-// Reads EventLogs_FrameworkRegistered → Framework table
 export async function seedFrameworks(toBlock?: bigint, fromBlock?: bigint): Promise<void> {
 	const env = loadEnv()
 

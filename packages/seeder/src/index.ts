@@ -21,7 +21,7 @@ console.log('Initializing Seeder ...')
 
 const UPDATE_FREQUENCY = 30
 
-let isSeedingBlockData = false
+export let isSeedingBlockData = false
 
 function delay(seconds: number) {
 	return new Promise((resolve) => setTimeout(resolve, seconds * 1000))
@@ -37,12 +37,10 @@ async function seedAll() {
 			)
 			console.time('Seeded data in')
 
-			// Block timestamps first — every event seeder reads them
 			isSeedingBlockData = true
 			await seedBlockData(targetBlock)
 			isSeedingBlockData = false
 
-			// Phase 1: raw event log archives (independent, run in parallel)
 			await Promise.all([
 				seedLogsFrameworkRegistered(targetBlock),
 				seedLogsJudgeRegistered(targetBlock),
@@ -52,8 +50,6 @@ async function seedAll() {
 				seedLogsVerdictDisputed(targetBlock)
 			])
 
-			// Phase 2: transform logs into structured tables. Registries first,
-			// then market lifecycle (Market → Verdict → Dispute).
 			await Promise.all([seedFrameworks(), seedJudges()])
 			await seedMarkets()
 			await seedVerdicts()
@@ -72,6 +68,3 @@ async function seedAll() {
 
 loadEnv()
 seedAll()
-
-// suppress unused-var warning while the block-data lock is informational only
-void isSeedingBlockData

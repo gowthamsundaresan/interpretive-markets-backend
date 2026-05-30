@@ -17,7 +17,6 @@ const LOGS_SYNC_KEY = 'lastSyncedBlock_logs_verdict_posted'
 
 // --- Core functions ---
 
-// Reads EventLogs_VerdictPosted → Verdict table (with readContract for full payload)
 export async function seedVerdicts(toBlock?: bigint, fromBlock?: bigint): Promise<void> {
 	const env = loadEnv()
 	const deployment = loadDeployment(env.DEPLOYMENT_FILE)

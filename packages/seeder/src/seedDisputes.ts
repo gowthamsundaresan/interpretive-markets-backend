@@ -13,7 +13,6 @@ const LOGS_SYNC_KEY = 'lastSyncedBlock_logs_verdict_disputed'
 
 // --- Core functions ---
 
-// Reads EventLogs_VerdictDisputed → flips Verdict.disputed
 export async function seedDisputes(toBlock?: bigint, fromBlock?: bigint): Promise<void> {
 	const env = loadEnv()
 
