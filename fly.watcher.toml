@@ -1,8 +1,7 @@
 app = "interpretive-watcher"
 primary_region = "ams"
 
-[build]
-dockerfile = "Dockerfile-Watcher"
+image = "ghcr.io/gowthamsundaresan/interpretive-markets-backend-watcher:latest"
 
 [env]
 NETWORK = "sepolia"

@@ -1,8 +1,7 @@
 app = "interpretive-seeder"
 primary_region = "ams"
 
-[build]
-dockerfile = "Dockerfile-Seeder"
+image = "ghcr.io/gowthamsundaresan/interpretive-markets-backend-seeder:latest"
 
 [env]
 NETWORK = "sepolia"

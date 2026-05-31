@@ -1,8 +1,9 @@
 app = "interpretive-api"
 primary_region = "ams"
 
-[build]
-dockerfile = "Dockerfile-API"
+# Image is built by .github/workflows/build_publish.yml on release/workflow_dispatch.
+# `fly deploy` will pull this image instead of building locally.
+image = "ghcr.io/gowthamsundaresan/interpretive-markets-backend-api:latest"
 
 [env]
 SERVER_PORT = "3000"
