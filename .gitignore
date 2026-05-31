@@ -6,9 +6,6 @@ dist/
 .DS_Store
 .vscode/
 .idea/
-
-# Prisma
 packages/prisma/src/generated/
-
-# tsc build info
 *.tsbuildinfo
+fly.*.toml

@@ -11,11 +11,7 @@
 		"format:fix": "prettier --write .",
 		"lint": "eslint .",
 		"lint:fix": "eslint --fix .",
-		"prepare": "husky install",
-		"fly:deploy:api": "fly deploy --config fly.api.toml",
-		"fly:deploy:seeder": "fly deploy --config fly.seeder.toml",
-		"fly:deploy:watcher": "fly deploy --config fly.watcher.toml",
-		"fly:deploy:all": "npm run fly:deploy:api && npm run fly:deploy:seeder && npm run fly:deploy:watcher"
+		"prepare": "husky install"
 	},
 	"devDependencies": {
 		"@trivago/prettier-plugin-sort-imports": "^4.2.0",

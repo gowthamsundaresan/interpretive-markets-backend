@@ -64,33 +64,27 @@ npm run dev -w @interpretive/seeder   # tails chain, populates Postgres
 npm run dev -w @interpretive/watcher  # re-execs pending verdicts
 ```
 
-## Deploy to Fly.io via GHCR
+## Deployment
 
-CI builds Docker images on every push to `main` and on tagged releases, and pushes them to GitHub Container Registry. Fly pulls those images instead of building locally.
+The three services are independent processes designed to run as Docker containers. Top-level [`Dockerfile-API`](./Dockerfile-API), [`Dockerfile-Seeder`](./Dockerfile-Seeder), and [`Dockerfile-Watcher`](./Dockerfile-Watcher) each produce a minimal `linux/amd64` image.
 
-**One-time:**
+Continuous builds via [`.github/workflows/build_publish.yml`](./.github/workflows/build_publish.yml) push the three images to GitHub Container Registry on every push to `main` and on tagged releases:
 
-1. Push this repo to GitHub.
-2. GitHub → Actions tab → run the `build and publish` workflow on `main`. After ~5 minutes you'll have three GHCR images:
-   - `ghcr.io/<you>/interpretive-markets-backend-api:latest`
-   - `ghcr.io/<you>/interpretive-markets-backend-seeder:latest`
-   - `ghcr.io/<you>/interpretive-markets-backend-watcher:latest`
-3. Make each GHCR package public (GitHub → Packages → Settings → "Change visibility") so Fly can pull without credentials.
-4. `brew install flyctl && fly auth login`
-5. `fly apps create interpretive-api interpretive-seeder interpretive-watcher`
-6. Set secrets per app — see [`docs/fly-secrets.md`](./docs/fly-secrets.md) for the exact `fly secrets set` commands.
+- `ghcr.io/<owner>/interpretive-markets-backend-api`
+- `ghcr.io/<owner>/interpretive-markets-backend-seeder`
+- `ghcr.io/<owner>/interpretive-markets-backend-watcher`
 
-**Ongoing:**
+Pull them into Fly, Railway, Render, Kubernetes, a VPS, or whatever else you run. The **api** needs to be publicly reachable (the judge fetches evidence from it); seeder and watcher are headless workers.
 
-```bash
-npm run fly:deploy:all
-# or individually:
-npm run fly:deploy:api
-npm run fly:deploy:seeder
-npm run fly:deploy:watcher
-```
+### Required environment per service
 
-Each deploy command runs `fly deploy --config fly.{service}.toml`, which tells Fly to pull the latest GHCR image and roll the machines.
+| Service | Required env                                                                                                                                                                                                                 |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| api     | `DATABASE_URL`, `DIRECT_URL`, optional `SERVER_PORT` (default 3000), `CORS_ORIGIN`                                                                                                                                           |
+| seeder  | `DATABASE_URL`, `DIRECT_URL`, `SEPOLIA_RPC_URL`, `FRAMEWORK_REGISTRY`, `JUDGE_REGISTRY`, `MARKET`, `START_BLOCK`                                                                                                             |
+| watcher | `DATABASE_URL`, `DIRECT_URL`, `SEPOLIA_RPC_URL`, `FRAMEWORK_REGISTRY`, `JUDGE_REGISTRY`, `MARKET`, `WATCHER_PRIVATE_KEY` (funds disputes), optional `INFERENCE_PATH` (default `gateway`) + `EIGENAI_API_KEY` if eigenai mode |
+
+Contract addresses come from `interpretive-markets/script/outputs/<network>/deployment.json` after running `forge script DeployRegistries` in the contracts repo. They can also be passed as env vars instead of `DEPLOYMENT_FILE` for cloud deploys.
 
 ## Inference paths
 
