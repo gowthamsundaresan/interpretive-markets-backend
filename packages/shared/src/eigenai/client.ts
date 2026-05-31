@@ -21,9 +21,13 @@ export interface InferenceResult {
 const DEFAULT_BASE_URL = 'https://eigenai.eigencloud.xyz/v1'
 
 export function createEigenAIClient(config: EigenAIConfig): OpenAI {
+	// EigenAI authenticates via X-API-Key, not Authorization: Bearer. We pass a
+	// placeholder apiKey to satisfy the OpenAI SDK constructor and override the
+	// real auth via defaultHeaders.
 	return new OpenAI({
-		apiKey: config.apiKey,
-		baseURL: config.baseURL ?? DEFAULT_BASE_URL
+		apiKey: 'eigenai',
+		baseURL: config.baseURL ?? DEFAULT_BASE_URL,
+		defaultHeaders: { 'x-api-key': config.apiKey }
 	})
 }
 
