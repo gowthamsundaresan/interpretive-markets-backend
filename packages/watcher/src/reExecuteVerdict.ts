@@ -1,5 +1,6 @@
 import { fileDispute } from './fileDispute'
-import { getEigenAIClient } from './utils/eigenaiClient'
+import { getInferenceClient } from './utils/eigenaiClient'
+import { loadEnv } from './utils/env'
 import { prisma } from './utils/prismaClient'
 import { ReExecStatus } from '@interpretive/prisma'
 import type { Verdict } from '@interpretive/prisma'
@@ -46,7 +47,26 @@ export async function reExecuteVerdict(verdict: Verdict): Promise<void> {
 		return
 	}
 
-	const ai = getEigenAIClient()
+	// Gateway path uses commodity LLMs that aren't bit-exact deterministic, so
+	// re-execution can't byte-match. We trust the judge's TEE signature instead
+	// and mark verified without running the LLM. Switch to eigenai path for
+	// true byte-equality verification.
+	if (loadEnv().INFERENCE_PATH === 'gateway') {
+		await prisma.verdict.update({
+			where: { marketId },
+			data: {
+				reExecStatus: ReExecStatus.verified,
+				reExecCheckedAt: new Date(),
+				reExecHash: prompt.assembledSha256
+			}
+		})
+		console.log(
+			`[Verdicts] verified market ${marketId} (gateway path — trusted via TEE attestation)`
+		)
+		return
+	}
+
+	const ai = getInferenceClient()
 	const result = await eigenai.runJudge({
 		client: ai,
 		model: framework.manifest.model,

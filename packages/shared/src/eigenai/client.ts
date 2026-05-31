@@ -1,14 +1,17 @@
 import type { FrameworkModel } from '../types/framework'
 import type { VerdictPayload } from '../types/verdict'
+import {
+	type EigenAIDirectConfig,
+	createEigenAIDirectClient,
+	runEigenAIDirect
+} from './eigenaiDirect'
+import { runGateway } from './gateway'
 import type { AssembledPrompt } from './prompt'
-import OpenAI from 'openai'
+import type OpenAI from 'openai'
 
 // --- Types ---
 
-export interface EigenAIConfig {
-	apiKey: string
-	baseURL?: string
-}
+export type InferencePath = 'gateway' | 'eigenai'
 
 export interface InferenceResult {
 	verdict: VerdictPayload
@@ -16,86 +19,44 @@ export interface InferenceResult {
 	responseId: string
 }
 
+export type InferenceClient = { path: 'gateway' } | { path: 'eigenai'; openai: OpenAI }
+
+export interface InferenceClientConfig {
+	path: InferencePath
+	eigenai?: EigenAIDirectConfig
+}
+
+// Backwards-compat alias for existing call sites.
+export type EigenAIConfig = EigenAIDirectConfig
+
 // --- Core functions ---
 
-const DEFAULT_BASE_URL = 'https://eigenai.eigencloud.xyz/v1'
-
-export function createEigenAIClient(config: EigenAIConfig): OpenAI {
-	// EigenAI authenticates via X-API-Key, not Authorization: Bearer. We pass a
-	// placeholder apiKey to satisfy the OpenAI SDK constructor and override the
-	// real auth via defaultHeaders.
-	return new OpenAI({
-		apiKey: 'eigenai',
-		baseURL: config.baseURL ?? DEFAULT_BASE_URL,
-		defaultHeaders: { 'x-api-key': config.apiKey }
-	})
+export function createInferenceClient(config: InferenceClientConfig): InferenceClient {
+	if (config.path === 'eigenai') {
+		if (!config.eigenai) {
+			throw new Error('inference path "eigenai" requires eigenai config')
+		}
+		return { path: 'eigenai', openai: createEigenAIDirectClient(config.eigenai) }
+	}
+	return { path: 'gateway' }
 }
 
 export async function runJudge(args: {
-	client: OpenAI
+	client: InferenceClient
 	model: FrameworkModel
 	prompt: AssembledPrompt
 }): Promise<InferenceResult> {
-	const { client, model, prompt } = args
-
-	const completion = await client.chat.completions.create({
-		model: model.id,
-		messages: [
-			{ role: 'system', content: prompt.system },
-			{ role: 'user', content: prompt.user }
-		],
-		temperature: model.sampling.temperature,
-		top_p: model.sampling.topP,
-		seed: model.sampling.seed,
-		max_tokens: model.sampling.maxTokens,
-		response_format: { type: 'json_object' }
+	if (args.client.path === 'gateway') {
+		return runGateway({ model: args.model, prompt: args.prompt })
+	}
+	return runEigenAIDirect({
+		client: args.client.openai,
+		model: args.model,
+		prompt: args.prompt
 	})
-
-	const choice = completion.choices[0]
-	if (!choice?.message?.content) {
-		throw new Error('eigenai returned no content')
-	}
-
-	const verdict = parseVerdict(choice.message.content)
-	return {
-		verdict,
-		rawResponse: choice.message.content,
-		responseId: completion.id
-	}
 }
 
-// --- Helper functions ---
-
-function parseVerdict(raw: string): VerdictPayload {
-	let parsed: unknown
-	try {
-		parsed = JSON.parse(raw)
-	} catch {
-		throw new Error(`eigenai response is not valid JSON: ${raw.slice(0, 200)}`)
-	}
-
-	if (!parsed || typeof parsed !== 'object') {
-		throw new Error(`eigenai response is not an object`)
-	}
-	const v = parsed as Record<string, unknown>
-	const outcome = v.outcome
-	const confidence = v.confidence
-	const reasoning = v.reasoning
-
-	if (outcome !== 0 && outcome !== 1 && outcome !== 2) {
-		throw new Error(`invalid outcome in verdict: ${String(outcome)}`)
-	}
-	if (typeof confidence !== 'number' || confidence < 0 || confidence > 1) {
-		throw new Error(`invalid confidence in verdict: ${String(confidence)}`)
-	}
-	if (typeof reasoning !== 'string') {
-		throw new Error(`invalid reasoning in verdict`)
-	}
-
-	const scorecard =
-		v.scorecard && typeof v.scorecard === 'object'
-			? (v.scorecard as Record<string, Record<string, number>>)
-			: undefined
-
-	return { outcome, confidence, reasoning, scorecard }
+// Backwards-compat: keep the old factory name so existing call sites keep working.
+export function createEigenAIClient(config: EigenAIDirectConfig): OpenAI {
+	return createEigenAIDirectClient(config)
 }

@@ -6,5 +6,11 @@ export * as viem from './viem/index'
 
 export type { PackedFramework, PinResult, PinataConfig } from './content/index'
 export type { AssembledPrompt } from './eigenai/prompt'
-export type { EigenAIConfig, InferenceResult } from './eigenai/client'
+export type {
+	EigenAIConfig,
+	InferenceClient,
+	InferenceClientConfig,
+	InferencePath,
+	InferenceResult
+} from './eigenai/client'
 export type { ChainClients, SupportedNetwork } from './viem/clients'

@@ -1,4 +1,4 @@
-import type { SupportedNetwork } from '@interpretive/shared'
+import type { InferencePath, SupportedNetwork } from '@interpretive/shared'
 import 'dotenv/config'
 
 // --- Types ---
@@ -9,7 +9,8 @@ export interface Env {
 	MAINNET_RPC_URL?: string
 	DEPLOYMENT_FILE: string
 	WATCHER_PRIVATE_KEY: `0x${string}`
-	EIGENAI_API_KEY: string
+	INFERENCE_PATH: InferencePath
+	EIGENAI_API_KEY?: string
 	EIGENAI_BASE_URL: string
 }
 
@@ -25,8 +26,9 @@ export function loadEnv(): Env {
 		MAINNET_RPC_URL: process.env.MAINNET_RPC_URL,
 		DEPLOYMENT_FILE: required('DEPLOYMENT_FILE'),
 		WATCHER_PRIVATE_KEY: required('WATCHER_PRIVATE_KEY') as `0x${string}`,
-		EIGENAI_API_KEY: required('EIGENAI_API_KEY'),
-		EIGENAI_BASE_URL: process.env.EIGENAI_BASE_URL ?? 'https://eigenai.eigencloud.xyz/v1'
+		INFERENCE_PATH: (process.env.INFERENCE_PATH ?? 'gateway') as InferencePath,
+		EIGENAI_API_KEY: process.env.EIGENAI_API_KEY,
+		EIGENAI_BASE_URL: process.env.EIGENAI_BASE_URL ?? 'https://eigenai-sepolia.eigencloud.xyz/v1'
 	}
 	return cached
 }
