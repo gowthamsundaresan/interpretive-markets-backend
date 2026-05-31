@@ -25,12 +25,12 @@ function delay(seconds: number) {
 
 async function seedAll() {
 	while (true) {
-		try {
-			const publicClient = getPublicClient()
-			const targetBlock = await publicClient.getBlockNumber()
-			console.log(`\nSeeding data, every ${UPDATE_FREQUENCY} seconds, till block ${targetBlock}:`)
-			console.time('Seeded data in')
+		const publicClient = getPublicClient()
+		const targetBlock = await publicClient.getBlockNumber()
+		console.log(`\nSeeding data, every ${UPDATE_FREQUENCY} seconds, till block ${targetBlock}:`)
+		console.time('Seeded data in')
 
+		try {
 			await Promise.all([
 				seedLogsFrameworkRegistered(targetBlock),
 				seedLogsJudgeRegistered(targetBlock),
@@ -44,13 +44,12 @@ async function seedAll() {
 			await seedMarkets()
 			await seedVerdicts()
 			await seedDisputes()
-
-			console.timeEnd('Seeded data in')
 		} catch (error) {
 			console.log('Failed to seed data at:', Date.now())
 			console.log(error)
 		}
 
+		console.timeEnd('Seeded data in')
 		await delay(UPDATE_FREQUENCY)
 	}
 }

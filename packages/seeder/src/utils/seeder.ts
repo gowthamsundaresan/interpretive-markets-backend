@@ -7,7 +7,9 @@ import type { PublicClient } from 'viem'
 
 export type DbTransaction = Prisma.PrismaPromise<unknown>
 
-const BLOCK_BATCH_SIZE = 4999n
+// Sized for Alchemy's free tier (eth_getLogs capped at a 10-block range, inclusive).
+// Bump to ~4999 once on a paid RPC plan.
+const BLOCK_BATCH_SIZE = 9n
 const DB_BATCH_SIZE = 1000
 
 // --- Core functions ---
