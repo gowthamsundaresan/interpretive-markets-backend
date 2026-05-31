@@ -30,15 +30,14 @@ chain events → EventLogs_*  (raw archive, one row per log, cursor-based)
 
 Each event seeder and each data seeder has its own cursor in `Setting`. The raw `EventLogs_*` archive is the durable source of truth — you can drop the structured tables and replay them without re-hitting the chain.
 
-## Live services
+## What the api exposes
 
-Once deployed (Fly.io recommended, GHCR-pulled images):
-
-- `https://interpretive-api.fly.dev/api/v1/markets` — list all markets with verdicts
-- `https://interpretive-api.fly.dev/api/v1/frameworks/<id>` — framework details
-- `https://interpretive-api.fly.dev/api/v1/evidence/<datasetId>` — evidence served to the judge (hardcoded for v0; will be replaced by indexed real-time data sources)
-
-Seeder and watcher run as headless workers on Fly with no public ports.
+- `GET /api/v1/markets` — list all markets with verdicts
+- `GET /api/v1/markets/:id` — full market + framework + judge + verdict + re-exec bundle
+- `GET /api/v1/markets/:id/verdict` — just the verdict
+- `GET /api/v1/frameworks` / `GET /api/v1/frameworks/:id` — registered frameworks
+- `GET /api/v1/judges` / `GET /api/v1/judges/:imageDigest` — registered judges
+- `GET /api/v1/evidence/:datasetId` — evidence served to the judge during resolution. Hardcoded for v0; this is the swap-in point for live indexed data sources (and eventually Opacity zkTLS for notarized fetches).
 
 ## Local development
 
