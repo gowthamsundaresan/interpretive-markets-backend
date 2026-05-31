@@ -1,8 +1,7 @@
-import OpenAI from 'openai'
-
 import type { FrameworkModel } from '../types/framework'
 import type { VerdictPayload } from '../types/verdict'
 import type { AssembledPrompt } from './prompt'
+import OpenAI from 'openai'
 
 // --- Types ---
 

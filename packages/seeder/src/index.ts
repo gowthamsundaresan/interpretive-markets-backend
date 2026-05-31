@@ -1,5 +1,3 @@
-import 'dotenv/config'
-
 import { seedBlockData } from './blocks/seedBlockData'
 import { seedLogsFrameworkRegistered } from './events/seedLogsFrameworkRegistered'
 import { seedLogsJudgeEnabledSet } from './events/seedLogsJudgeEnabledSet'
@@ -14,6 +12,7 @@ import { seedMarkets } from './seedMarkets'
 import { seedVerdicts } from './seedVerdicts'
 import { loadEnv } from './utils/env'
 import { getPublicClient } from './utils/viemClient'
+import 'dotenv/config'
 
 console.log('Initializing Seeder ...')
 
@@ -32,9 +31,7 @@ async function seedAll() {
 		try {
 			const publicClient = getPublicClient()
 			const targetBlock = await publicClient.getBlockNumber()
-			console.log(
-				`\nSeeding data, every ${UPDATE_FREQUENCY} seconds, till block ${targetBlock}:`
-			)
+			console.log(`\nSeeding data, every ${UPDATE_FREQUENCY} seconds, till block ${targetBlock}:`)
 			console.time('Seeded data in')
 
 			isSeedingBlockData = true

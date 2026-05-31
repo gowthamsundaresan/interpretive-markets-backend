@@ -1,7 +1,6 @@
-import { ReExecStatus } from '@interpretive/prisma'
-
 import { reExecuteVerdict } from './reExecuteVerdict'
 import { prisma } from './utils/prismaClient'
+import { ReExecStatus } from '@interpretive/prisma'
 
 const BATCH_SIZE = 10
 

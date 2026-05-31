@@ -1,18 +1,25 @@
-FROM node:22-alpine AS build
-WORKDIR /repo
+FROM node:22-alpine
+
+WORKDIR /app
+
+ARG CI_BUILD_VERSION
+ENV API_VERSION=$CI_BUILD_VERSION
+
 COPY package.json package-lock.json* tsconfig.base.json ./
 COPY packages/shared/package.json ./packages/shared/package.json
 COPY packages/prisma/package.json ./packages/prisma/package.json
 COPY packages/api/package.json ./packages/api/package.json
-RUN npm install
+
+RUN npm install --ignore-scripts
+
 COPY packages/shared ./packages/shared
 COPY packages/prisma ./packages/prisma
 COPY packages/api ./packages/api
-RUN npm run prisma:generate -w @interpretive/prisma && npm run build -w @interpretive/api
 
-FROM node:22-alpine
-WORKDIR /repo
-COPY --from=build /repo /repo
+RUN npm run prisma:generate -w @interpretive/prisma
+RUN npm run build -w @interpretive/api
+
 EXPOSE 3000
-WORKDIR /repo/packages/api
-CMD ["node", "dist/index.js"]
+
+WORKDIR /app/packages/api
+CMD ["npx", "tsx", "src/index.ts"]

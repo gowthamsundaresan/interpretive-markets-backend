@@ -1,7 +1,6 @@
-import type { Prisma } from '@interpretive/prisma'
-
 import { chunkArray } from './array'
 import { prisma } from './prismaClient'
+import type { Prisma } from '@interpretive/prisma'
 
 // --- Types ---
 

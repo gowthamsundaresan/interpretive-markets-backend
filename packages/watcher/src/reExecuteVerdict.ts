@@ -1,16 +1,14 @@
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
-
+import { fileDispute } from './fileDispute'
+import { getEigenAIClient } from './utils/eigenaiClient'
+import { prisma } from './utils/prismaClient'
 import { ReExecStatus } from '@interpretive/prisma'
 import type { Verdict } from '@interpretive/prisma'
 import { content, eigenai } from '@interpretive/shared'
 import type { FrameworkManifest, ReExecBundle } from '@interpretive/shared'
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { keccak256, toBytes } from 'viem'
-
-import { fileDispute } from './fileDispute'
-import { getEigenAIClient } from './utils/eigenaiClient'
-import { prisma } from './utils/prismaClient'
 
 // --- Core functions ---
 
@@ -59,7 +57,9 @@ export async function reExecuteVerdict(verdict: Verdict): Promise<void> {
 	const expected = verdict.verdictHash
 
 	if (reHash !== expected) {
-		console.log(`[Verdicts] hash mismatch for market ${marketId}: expected=${expected} re=${reHash}`)
+		console.log(
+			`[Verdicts] hash mismatch for market ${marketId}: expected=${expected} re=${reHash}`
+		)
 		await flagDisputed({ marketId, reExecHash: reHash, reason: 'verdict bytes diverge' })
 		return
 	}

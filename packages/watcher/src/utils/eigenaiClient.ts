@@ -1,6 +1,5 @@
-import { eigenai } from '@interpretive/shared'
-
 import { loadEnv } from './env'
+import { eigenai } from '@interpretive/shared'
 
 // --- Core functions ---
 

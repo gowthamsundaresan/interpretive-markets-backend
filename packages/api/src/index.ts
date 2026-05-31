@@ -1,9 +1,3 @@
-import 'dotenv/config'
-import fastifyCors from '@fastify/cors'
-import fastifyEnv from '@fastify/env'
-import fastify from 'fastify'
-import fastifyPlugin from 'fastify-plugin'
-
 import { API_VERSION } from './constants'
 import { cacheHook } from './hooks/cache'
 import { rateLimitHook } from './hooks/rateLimit'
@@ -12,6 +6,11 @@ import { register as registerFrameworks } from './routes/frameworks/frameworksRo
 import { register as registerJudges } from './routes/judges/judgesRoutes'
 import { register as registerMarkets } from './routes/markets/marketsRoutes'
 import { envSchema } from './schema/env'
+import fastifyCors from '@fastify/cors'
+import fastifyEnv from '@fastify/env'
+import 'dotenv/config'
+import fastify from 'fastify'
+import fastifyPlugin from 'fastify-plugin'
 
 // --- Core functions ---
 

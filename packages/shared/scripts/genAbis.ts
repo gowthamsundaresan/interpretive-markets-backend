@@ -31,7 +31,9 @@ const TARGETS: ContractTarget[] = [
 
 async function main() {
 	if (!existsSync(OUT_DIR)) {
-		throw new Error(`contracts out/ not found at ${OUT_DIR}. Run \`forge build\` in the contracts repo.`)
+		throw new Error(
+			`contracts out/ not found at ${OUT_DIR}. Run \`forge build\` in the contracts repo.`
+		)
 	}
 	mkdirSync(ABI_DIR, { recursive: true })
 

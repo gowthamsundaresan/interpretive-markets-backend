@@ -1,18 +1,17 @@
-import { frameworkRegistryAbi } from '@interpretive/shared'
-import { getAbiItem, type AbiEvent } from 'viem'
-
 import { loadDeployment } from '../data/address'
 import { loadEnv } from '../utils/env'
 import { prisma } from '../utils/prismaClient'
 import {
+	type DbTransaction,
 	bulkUpdateDbTransactions,
 	fetchLastSyncBlock,
 	getBlockDataFromDb,
 	loopThroughBlocks,
-	saveLastSyncBlockTransaction,
-	type DbTransaction
+	saveLastSyncBlockTransaction
 } from '../utils/seeder'
 import { getPublicClient } from '../utils/viemClient'
+import { frameworkRegistryAbi } from '@interpretive/shared'
+import { type AbiEvent, getAbiItem } from 'viem'
 
 const SYNC_KEY = 'lastSyncedBlock_logs_framework_registered'
 

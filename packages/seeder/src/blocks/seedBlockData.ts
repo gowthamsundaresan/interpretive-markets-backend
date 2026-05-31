@@ -1,11 +1,11 @@
 import { loadEnv } from '../utils/env'
 import { prisma } from '../utils/prismaClient'
 import {
+	type DbTransaction,
 	bulkUpdateDbTransactions,
 	fetchLastSyncBlock,
 	loopThroughBlocks,
-	saveLastSyncBlockTransaction,
-	type DbTransaction
+	saveLastSyncBlockTransaction
 } from '../utils/seeder'
 import { getPublicClient } from '../utils/viemClient'
 

@@ -1,6 +1,5 @@
-import 'dotenv/config'
-
 import type { SupportedNetwork } from '@interpretive/shared'
+import 'dotenv/config'
 
 // --- Types ---
 

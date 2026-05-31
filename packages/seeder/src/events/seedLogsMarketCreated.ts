@@ -1,27 +1,23 @@
-import { marketAbi } from '@interpretive/shared'
-import { getAbiItem, type AbiEvent } from 'viem'
-
 import { loadDeployment } from '../data/address'
 import { loadEnv } from '../utils/env'
 import { prisma } from '../utils/prismaClient'
 import {
+	type DbTransaction,
 	bulkUpdateDbTransactions,
 	fetchLastSyncBlock,
 	getBlockDataFromDb,
 	loopThroughBlocks,
-	saveLastSyncBlockTransaction,
-	type DbTransaction
+	saveLastSyncBlockTransaction
 } from '../utils/seeder'
 import { getPublicClient } from '../utils/viemClient'
+import { marketAbi } from '@interpretive/shared'
+import { type AbiEvent, getAbiItem } from 'viem'
 
 const SYNC_KEY = 'lastSyncedBlock_logs_market_created'
 
 // --- Core functions ---
 
-export async function seedLogsMarketCreated(
-	toBlock?: bigint,
-	fromBlock?: bigint
-): Promise<void> {
+export async function seedLogsMarketCreated(toBlock?: bigint, fromBlock?: bigint): Promise<void> {
 	const env = loadEnv()
 	const deployment = loadDeployment(env.DEPLOYMENT_FILE)
 	const publicClient = getPublicClient()

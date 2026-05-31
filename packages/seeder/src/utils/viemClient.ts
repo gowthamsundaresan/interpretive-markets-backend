@@ -1,7 +1,6 @@
+import { loadEnv } from './env'
 import { viem } from '@interpretive/shared'
 import type { PublicClient } from 'viem'
-
-import { loadEnv } from './env'
 
 let cached: PublicClient | null = null
 

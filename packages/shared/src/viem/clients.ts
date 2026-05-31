@@ -1,13 +1,13 @@
 import {
-	createPublicClient,
-	createWalletClient,
-	http,
 	type Account,
 	type Chain,
 	type PublicClient,
-	type WalletClient
+	type WalletClient,
+	createPublicClient,
+	createWalletClient,
+	http
 } from 'viem'
-import { privateKeyToAccount, mnemonicToAccount } from 'viem/accounts'
+import { mnemonicToAccount, privateKeyToAccount } from 'viem/accounts'
 import { mainnet, sepolia } from 'viem/chains'
 
 // --- Types ---

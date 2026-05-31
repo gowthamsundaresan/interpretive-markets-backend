@@ -1,16 +1,15 @@
-import { marketAbi } from '@interpretive/shared'
-
 import { loadDeployment } from './data/address'
 import { loadEnv } from './utils/env'
 import { prisma } from './utils/prismaClient'
 import {
+	type DbTransaction,
 	bulkUpdateDbTransactions,
 	fetchLastSyncBlock,
 	loopThroughBlocks,
-	saveLastSyncBlock,
-	type DbTransaction
+	saveLastSyncBlock
 } from './utils/seeder'
 import { getPublicClient } from './utils/viemClient'
+import { marketAbi } from '@interpretive/shared'
 
 const SYNC_KEY = 'lastSyncedBlock_data_markets'
 const LOGS_SYNC_KEY = 'lastSyncedBlock_logs_market_created'

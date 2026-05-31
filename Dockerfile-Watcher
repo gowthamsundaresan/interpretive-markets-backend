@@ -1,17 +1,23 @@
-FROM node:22-alpine AS build
-WORKDIR /repo
+FROM node:22-alpine
+
+WORKDIR /app
+
+ARG CI_BUILD_VERSION
+ENV WATCHER_VERSION=$CI_BUILD_VERSION
+
 COPY package.json package-lock.json* tsconfig.base.json ./
 COPY packages/shared/package.json ./packages/shared/package.json
 COPY packages/prisma/package.json ./packages/prisma/package.json
 COPY packages/watcher/package.json ./packages/watcher/package.json
-RUN npm install
+
+RUN npm install --ignore-scripts
+
 COPY packages/shared ./packages/shared
 COPY packages/prisma ./packages/prisma
 COPY packages/watcher ./packages/watcher
-RUN npm run prisma:generate -w @interpretive/prisma && npm run build -w @interpretive/watcher
 
-FROM node:22-alpine
-WORKDIR /repo
-COPY --from=build /repo /repo
-WORKDIR /repo/packages/watcher
-CMD ["node", "dist/index.js"]
+RUN npm run prisma:generate -w @interpretive/prisma
+RUN npm run build -w @interpretive/watcher
+
+WORKDIR /app/packages/watcher
+CMD ["npx", "tsx", "src/index.ts"]

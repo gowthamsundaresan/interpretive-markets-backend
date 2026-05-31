@@ -1,11 +1,11 @@
 import { loadEnv } from './utils/env'
 import { prisma } from './utils/prismaClient'
 import {
+	type DbTransaction,
 	bulkUpdateDbTransactions,
 	fetchLastSyncBlock,
 	loopThroughBlocks,
-	saveLastSyncBlock,
-	type DbTransaction
+	saveLastSyncBlock
 } from './utils/seeder'
 
 const SYNC_KEY = 'lastSyncedBlock_data_disputes'

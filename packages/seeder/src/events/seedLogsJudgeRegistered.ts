@@ -1,27 +1,23 @@
-import { judgeRegistryAbi } from '@interpretive/shared'
-import { getAbiItem, type AbiEvent } from 'viem'
-
 import { loadDeployment } from '../data/address'
 import { loadEnv } from '../utils/env'
 import { prisma } from '../utils/prismaClient'
 import {
+	type DbTransaction,
 	bulkUpdateDbTransactions,
 	fetchLastSyncBlock,
 	getBlockDataFromDb,
 	loopThroughBlocks,
-	saveLastSyncBlockTransaction,
-	type DbTransaction
+	saveLastSyncBlockTransaction
 } from '../utils/seeder'
 import { getPublicClient } from '../utils/viemClient'
+import { judgeRegistryAbi } from '@interpretive/shared'
+import { type AbiEvent, getAbiItem } from 'viem'
 
 const SYNC_KEY = 'lastSyncedBlock_logs_judge_registered'
 
 // --- Core functions ---
 
-export async function seedLogsJudgeRegistered(
-	toBlock?: bigint,
-	fromBlock?: bigint
-): Promise<void> {
+export async function seedLogsJudgeRegistered(toBlock?: bigint, fromBlock?: bigint): Promise<void> {
 	const env = loadEnv()
 	const deployment = loadDeployment(env.DEPLOYMENT_FILE)
 	const publicClient = getPublicClient()

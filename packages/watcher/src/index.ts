@@ -1,7 +1,6 @@
-import 'dotenv/config'
-
 import { checkPendingVerdicts } from './checkVerdicts'
 import { loadEnv } from './utils/env'
+import 'dotenv/config'
 
 console.log('Initializing Watcher ...')
 

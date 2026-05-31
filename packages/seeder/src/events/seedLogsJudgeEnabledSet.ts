@@ -1,27 +1,23 @@
-import { judgeRegistryAbi } from '@interpretive/shared'
-import { getAbiItem, type AbiEvent } from 'viem'
-
 import { loadDeployment } from '../data/address'
 import { loadEnv } from '../utils/env'
 import { prisma } from '../utils/prismaClient'
 import {
+	type DbTransaction,
 	bulkUpdateDbTransactions,
 	fetchLastSyncBlock,
 	getBlockDataFromDb,
 	loopThroughBlocks,
-	saveLastSyncBlockTransaction,
-	type DbTransaction
+	saveLastSyncBlockTransaction
 } from '../utils/seeder'
 import { getPublicClient } from '../utils/viemClient'
+import { judgeRegistryAbi } from '@interpretive/shared'
+import { type AbiEvent, getAbiItem } from 'viem'
 
 const SYNC_KEY = 'lastSyncedBlock_logs_judge_enabled_set'
 
 // --- Core functions ---
 
-export async function seedLogsJudgeEnabledSet(
-	toBlock?: bigint,
-	fromBlock?: bigint
-): Promise<void> {
+export async function seedLogsJudgeEnabledSet(toBlock?: bigint, fromBlock?: bigint): Promise<void> {
 	const env = loadEnv()
 	const deployment = loadDeployment(env.DEPLOYMENT_FILE)
 	const publicClient = getPublicClient()
@@ -52,9 +48,8 @@ export async function seedLogsJudgeEnabledSet(
 		}[] = []
 
 		for (const log of logs) {
-			const args = (
-				log as unknown as { args: { imageDigest: `0x${string}`; enabled: boolean } }
-			).args
+			const args = (log as unknown as { args: { imageDigest: `0x${string}`; enabled: boolean } })
+				.args
 			const blockNumber = log.blockNumber ?? 0n
 			rows.push({
 				address: log.address,

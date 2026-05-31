@@ -1,7 +1,6 @@
+import { loadEnv } from './env'
 import { viem } from '@interpretive/shared'
 import type { ChainClients } from '@interpretive/shared'
-
-import { loadEnv } from './env'
 
 let cached: ChainClients | null = null
 

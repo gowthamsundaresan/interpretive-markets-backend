@@ -1,9 +1,8 @@
-import { marketAbi } from '@interpretive/shared'
-import { encodeAbiParameters } from 'viem'
-
 import { loadDeployment } from './data/address/index'
 import { loadEnv } from './utils/env'
 import { getClients } from './utils/viemClient'
+import { marketAbi } from '@interpretive/shared'
+import { encodeAbiParameters } from 'viem'
 
 // --- Core functions ---
 
