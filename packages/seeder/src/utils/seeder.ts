@@ -1,6 +1,7 @@
 import { chunkArray } from './array'
 import { prisma } from './prismaClient'
 import type { Prisma } from '@interpretive/prisma'
+import type { PublicClient } from 'viem'
 
 // --- Types ---
 
@@ -72,14 +73,22 @@ export function saveLastSyncBlockTransaction(key: string, blockNumber: bigint): 
 	})
 }
 
-export async function getBlockDataFromDb(
-	fromBlock: bigint,
-	toBlock: bigint
+// Lazy block timestamp lookup — fetches only the unique block numbers we actually
+// saw events in, instead of scanning every block in the range.
+export async function getBlockTimestamps(
+	publicClient: PublicClient,
+	blockNumbers: bigint[]
 ): Promise<Map<bigint, Date>> {
-	const rows = await prisma.evm_BlockData.findMany({
-		where: { number: { gte: fromBlock, lte: toBlock } },
-		select: { number: true, timestamp: true },
-		orderBy: { number: 'asc' }
-	})
-	return new Map(rows.map((r) => [r.number, r.timestamp]))
+	const unique = Array.from(new Set(blockNumbers))
+	if (unique.length === 0) return new Map()
+
+	const blocks = await Promise.all(
+		unique.map((n) =>
+			publicClient.getBlock({ blockNumber: n }).then((b) => ({
+				number: n,
+				timestamp: new Date(Number(b.timestamp) * 1000)
+			}))
+		)
+	)
+	return new Map(blocks.map((b) => [b.number, b.timestamp]))
 }

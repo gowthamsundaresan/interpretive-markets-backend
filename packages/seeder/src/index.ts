@@ -1,4 +1,3 @@
-import { seedBlockData } from './blocks/seedBlockData'
 import { seedLogsFrameworkRegistered } from './events/seedLogsFrameworkRegistered'
 import { seedLogsJudgeEnabledSet } from './events/seedLogsJudgeEnabledSet'
 import { seedLogsJudgeRegistered } from './events/seedLogsJudgeRegistered'
@@ -20,8 +19,6 @@ console.log('Initializing Seeder ...')
 
 const UPDATE_FREQUENCY = 30
 
-export let isSeedingBlockData = false
-
 function delay(seconds: number) {
 	return new Promise((resolve) => setTimeout(resolve, seconds * 1000))
 }
@@ -33,10 +30,6 @@ async function seedAll() {
 			const targetBlock = await publicClient.getBlockNumber()
 			console.log(`\nSeeding data, every ${UPDATE_FREQUENCY} seconds, till block ${targetBlock}:`)
 			console.time('Seeded data in')
-
-			isSeedingBlockData = true
-			await seedBlockData(targetBlock)
-			isSeedingBlockData = false
 
 			await Promise.all([
 				seedLogsFrameworkRegistered(targetBlock),
@@ -56,7 +49,6 @@ async function seedAll() {
 		} catch (error) {
 			console.log('Failed to seed data at:', Date.now())
 			console.log(error)
-			isSeedingBlockData = false
 		}
 
 		await delay(UPDATE_FREQUENCY)

@@ -96,11 +96,6 @@ model Setting {
   updatedAt DateTime @updatedAt
 }
 
-model Evm_BlockData {
-  number    BigInt   @id
-  timestamp DateTime
-}
-
 model EventLogs_FrameworkRegistered {
   address          String
   transactionHash  String

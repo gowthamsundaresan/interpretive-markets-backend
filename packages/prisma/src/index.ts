@@ -6,7 +6,6 @@ export type {
 	EventLogs_MarketCreated,
 	EventLogs_VerdictDisputed,
 	EventLogs_VerdictPosted,
-	Evm_BlockData,
 	Framework,
 	Judge,
 	Market,

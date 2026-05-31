@@ -5,7 +5,7 @@ import {
 	type DbTransaction,
 	bulkUpdateDbTransactions,
 	fetchLastSyncBlock,
-	getBlockDataFromDb,
+	getBlockTimestamps,
 	loopThroughBlocks,
 	saveLastSyncBlockTransaction
 } from '../utils/seeder'
@@ -35,7 +35,10 @@ export async function seedLogsVerdictPosted(toBlock?: bigint, fromBlock?: bigint
 			toBlock: windowTo
 		})
 
-		const blockData = await getBlockDataFromDb(windowFrom, windowTo)
+		const blockData = await getBlockTimestamps(
+			publicClient,
+			logs.map((l) => l.blockNumber ?? 0n)
+		)
 		const rows: {
 			address: string
 			transactionHash: string
