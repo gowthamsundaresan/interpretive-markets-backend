@@ -1,7 +1,8 @@
-FROM node:22-alpine
+FROM node:22-slim
 
-# Prisma's linux-musl-openssl-3.0.x engine needs libssl3 + ca-certificates at runtime.
-RUN apk add --no-cache openssl ca-certificates
+# Debian slim has libssl3 + ca-certificates baked in — Prisma's debian-openssl-3.0.x
+# engine loads cleanly without the version-detection quirks Alpine has.
+RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
