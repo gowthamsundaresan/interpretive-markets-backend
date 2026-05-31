@@ -1,0 +1,15 @@
+app = "interpretive-watcher"
+primary_region = "ams"
+
+[build]
+dockerfile = "Dockerfile-Watcher"
+
+[env]
+NETWORK = "sepolia"
+INFERENCE_PATH = "gateway"
+EIGENAI_BASE_URL = "https://eigenai-sepolia.eigencloud.xyz/v1"
+
+[[vm]]
+memory = "256mb"
+cpu_kind = "shared"
+cpus = 1

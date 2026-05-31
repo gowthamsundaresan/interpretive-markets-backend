@@ -24,7 +24,8 @@ export function loadEnv(): Env {
 		NETWORK: (process.env.NETWORK ?? 'sepolia') as SupportedNetwork,
 		SEPOLIA_RPC_URL: process.env.SEPOLIA_RPC_URL,
 		MAINNET_RPC_URL: process.env.MAINNET_RPC_URL,
-		DEPLOYMENT_FILE: required('DEPLOYMENT_FILE'),
+		// Optional when FRAMEWORK_REGISTRY/JUDGE_REGISTRY/MARKET env vars are set.
+		DEPLOYMENT_FILE: process.env.DEPLOYMENT_FILE ?? '',
 		WATCHER_PRIVATE_KEY: required('WATCHER_PRIVATE_KEY') as `0x${string}`,
 		INFERENCE_PATH: (process.env.INFERENCE_PATH ?? 'gateway') as InferencePath,
 		EIGENAI_API_KEY: process.env.EIGENAI_API_KEY,

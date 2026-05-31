@@ -24,7 +24,8 @@ export function loadEnv(): Env {
 		NETWORK: network,
 		SEPOLIA_RPC_URL: process.env.SEPOLIA_RPC_URL,
 		MAINNET_RPC_URL: process.env.MAINNET_RPC_URL,
-		DEPLOYMENT_FILE: required('DEPLOYMENT_FILE'),
+		// Optional when FRAMEWORK_REGISTRY/JUDGE_REGISTRY/MARKET env vars are set.
+		DEPLOYMENT_FILE: process.env.DEPLOYMENT_FILE ?? '',
 		START_BLOCK: BigInt(process.env.START_BLOCK ?? '0'),
 		CRON_INTERVAL: process.env.CRON_INTERVAL ?? '*/30 * * * * *',
 		LOG_LEVEL: process.env.LOG_LEVEL ?? 'info'

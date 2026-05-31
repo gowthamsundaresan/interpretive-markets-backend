@@ -1,0 +1,14 @@
+app = "interpretive-seeder"
+primary_region = "ams"
+
+[build]
+dockerfile = "Dockerfile-Seeder"
+
+[env]
+NETWORK = "sepolia"
+START_BLOCK = "10963000"
+
+[[vm]]
+memory = "256mb"
+cpu_kind = "shared"
+cpus = 1
