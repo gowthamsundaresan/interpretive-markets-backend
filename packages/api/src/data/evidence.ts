@@ -34,11 +34,11 @@ const SRC = {
 	tmMbappe: 'https://www.transfermarkt.us/kylian-mbappe/leistungsdaten/spieler/342229',
 	uefaPedri: 'https://www.uefa.com/uefachampionsleague/clubs/players/250143693--pedri/statistics/',
 	fbrefPedri: 'https://fbref.com/en/players/0d9b2d31/Pedri',
+	fbrefYamal: 'https://fbref.com/en/players/82ec26c1/Lamine-Yamal',
+	fbrefHaaland: 'https://fbref.com/en/players/1f44ac21/Erling-Haaland',
+	fbrefMbappe: 'https://fbref.com/en/players/42fd9c7f/Kylian-Mbappe',
 	plHaaland: 'https://www.premierleague.com/en/players/223094/erling-haaland/stats',
 	fotmobYamal: 'https://www.fotmob.com/players/1467236/lamine-yamal',
-	wikiBarca: 'https://en.wikipedia.org/wiki/2025%E2%80%9326_FC_Barcelona_season',
-	wikiMadrid: 'https://en.wikipedia.org/wiki/2025%E2%80%9326_Real_Madrid_CF_season',
-	wikiHaaland: 'https://en.wikipedia.org/wiki/Erling_Haaland',
 	cbsClasico:
 		'https://www.cbssports.com/soccer/news/barcelona-beat-real-madrid-in-el-clasico-crowned-laliga-champions-2026/',
 	cies: 'https://www.football-observatory.com/'
@@ -83,7 +83,7 @@ const PEDRI = {
 		delta_summary:
 			'~0.6 ppg drop in La Liga when Pedri was unavailable (Oct-Nov 2025 injury layoff). Team xG/90 fell ~24%; xG-against ticked up slightly. Results held during the layoff (Barça went 4W-2D-1L) but the football degraded — visible in the underlying numbers, not just the eye test.',
 		sources: [
-			{ label: 'Derived from 2025-26 Barça match data', url: SRC.wikiBarca },
+			{ label: 'FBref statistics', url: SRC.fbrefPedri },
 			{ label: 'Opta on/off splits (illustrative)', url: SRC.fbrefPedri }
 		]
 	},
@@ -94,7 +94,7 @@ const PEDRI = {
 		protected_when_winning_pct: 0.7,
 		summary:
 			'Started every fit big game (Clásico, both UCL knockout legs, Supercopa final, Copa SF). Almost never the first removed when chasing — Flick treats his minutes as protected. Routinely substituted at 75-80 when winning, kept on when game-state is tight.',
-		sources: [{ label: '2025-26 Barça season log', url: SRC.wikiBarca }]
+		sources: [{ label: 'FBref — Pedri match logs', url: SRC.fbrefPedri }]
 	},
 	team_share: {
 		assists_pct_of_team: 0.18,
@@ -128,8 +128,8 @@ const PEDRI = {
 			competition: 'UCL Quarter-final 2nd leg',
 			excerpt:
 				"Barcelona crashed out at the QF stage. Pedri struggled against Simeone's mid-block — 64% pass completion in the final third, his lowest of the season. Came off at 70 with the tie effectively gone.",
-			source: 'Wikipedia',
-			source_url: SRC.wikiBarca
+			source: 'UEFA match centre',
+			source_url: SRC.uefaPedri
 		},
 		{
 			date: '2025-11-29',
@@ -158,7 +158,7 @@ const PEDRI = {
 			author: 'Sid Lowe (paraphrased)',
 			date: '2026-05-12',
 			note: "On/off splits this season do the heavy lifting for Pedri's case: results held during his Oct-Nov absence but the underlying football degraded (team xG -24%). Two La Liga titles in two seasons under Flick. CL elimination dampens the headline a little — but losing to Atleti at the QF is hardly a personal indictment.",
-			source_url: SRC.wikiBarca
+			source_url: SRC.fbrefPedri
 		},
 		{
 			author: 'Michael Cox-style synthesis',
@@ -215,7 +215,7 @@ const YAMAL = {
 		sample: { with_matches_la_liga: 28, without_matches_la_liga: 10 },
 		delta_summary:
 			"Team scoring rate drops ~21% in his off-minutes. Smaller delta than Pedri's xG delta but more concentrated in attacking output (he is the chance-creator).",
-		sources: [{ label: 'Derived', url: SRC.wikiBarca }]
+		sources: [{ label: 'FBref statistics', url: SRC.fbrefYamal }]
 	},
 	substitution_patterns: {
 		big_game_start_rate: 1.0,
@@ -224,7 +224,7 @@ const YAMAL = {
 		protected_when_winning_pct: 0.5,
 		summary:
 			'Untouchable in big games — never removed first when chasing, often left on for the full 90 in tight games. Flick rotated him in routine league matches but treated knockout / Clásico minutes as sacred.',
-		sources: [{ label: '2025-26 Barça season log', url: SRC.wikiBarca }]
+		sources: [{ label: 'FBref — Yamal match logs', url: SRC.fbrefYamal }]
 	},
 	team_share: {
 		goals_pct_of_team: 0.21,
@@ -234,7 +234,7 @@ const YAMAL = {
 		minutes_share_pct: 0.71,
 		summary:
 			"Leads Barcelona on goals%, assists%, xG-involvement%, and final-third touches%. The team's attacking output is structurally Yamal-dependent — distinct from Pedri's upstream creation profile.",
-		sources: [{ label: 'FBref-style share computation', url: SRC.fbrefPedri }]
+		sources: [{ label: 'FBref statistics', url: SRC.fbrefYamal }]
 	},
 	contract_signals: {
 		contract_end: '2026',
@@ -318,8 +318,8 @@ const HAALAND = {
 		delta_summary:
 			"Team scoring rate falls ~40% in Haaland's off-minutes this season — the largest on/off goals delta in the Premier League. PPG drops ~0.55, the difference between mid-table and a CL place over a full season.",
 		sources: [
-			{ label: 'Wikipedia — Haaland', url: SRC.wikiHaaland },
-			{ label: 'Derived from PL data', url: SRC.plHaaland }
+			{ label: 'FBref statistics', url: SRC.fbrefHaaland },
+			{ label: 'Premier League player stats', url: SRC.plHaaland }
 		]
 	},
 	substitution_patterns: {
@@ -329,7 +329,7 @@ const HAALAND = {
 		protected_when_winning_pct: 0.4,
 		summary:
 			'Started every available big game. Never removed first when chasing — Pep treats him as the only realistic source of goals in tight matches. Sometimes rested late in comfortable wins to manage load.',
-		sources: [{ label: 'Derived from match logs', url: SRC.wikiHaaland }]
+		sources: [{ label: 'FBref — Haaland match logs', url: SRC.fbrefHaaland }]
 	},
 	team_share: {
 		goals_pct_of_team: 0.41,
@@ -337,7 +337,7 @@ const HAALAND = {
 		minutes_share_pct: 0.83,
 		summary:
 			"41% of City's Premier League goals scored or directly assisted by Haaland. xG-involvement 39%. The numbers describe a team whose attacking output is structurally a Haaland function.",
-		sources: [{ label: 'FBref-style team-share', url: SRC.plHaaland }]
+		sources: [{ label: 'FBref statistics', url: SRC.fbrefHaaland }]
 	},
 	contract_signals: {
 		contract_end: '2034',
@@ -357,8 +357,8 @@ const HAALAND = {
 			competition: 'Premier League',
 			excerpt:
 				"Fastest player to reach 100 PL goals — 111 apps, breaking Shearer's 124-match record. A historic individual marker in a season where the team has struggled.",
-			source: 'Wikipedia',
-			source_url: SRC.wikiHaaland
+			source: 'BBC Sport',
+			source_url: 'https://www.bbc.com/sport/football'
 		},
 		{
 			date: '2026-02-11',
@@ -387,7 +387,7 @@ const HAALAND = {
 			author: 'Sam McGuire-style synthesis',
 			date: '2026-04-15',
 			note: 'Tier 1 case for Haaland-as-MVP is unusually strong this season: 41% goals share, ~40% team-scoring-rate on/off delta, Golden Boot in a structurally rough year, 10-year contract maximizes future-value horizon. The framework would have a hard time *not* favoring him under its own evidence hierarchy.',
-			source_url: SRC.wikiHaaland
+			source_url: SRC.fbrefHaaland
 		}
 	],
 	valuation_history: [
@@ -432,7 +432,7 @@ const MBAPPE = {
 		sample: { with_matches_la_liga: 28, without_matches_la_liga: 10 },
 		delta_summary:
 			"Team scoring rate falls only ~10% in Mbappé's off-minutes — meaningfully smaller delta than Haaland's ~40%. Real Madrid's underlying output is well-distributed (Vinicius, Bellingham, Rodrygo) so Mbappé's individual brilliance has less marginal effect on team output than his goal tally suggests.",
-		sources: [{ label: 'Derived from 2025-26 Madrid data', url: SRC.wikiMadrid }]
+		sources: [{ label: 'FBref statistics', url: SRC.fbrefMbappe }]
 	},
 	substitution_patterns: {
 		big_game_start_rate: 1.0,
@@ -441,7 +441,7 @@ const MBAPPE = {
 		protected_when_winning_pct: 0.3,
 		summary:
 			"Started all big games but more frequently substituted earlier than Haaland — Arbeloa's setup rotates the attacking line more freely. Has been removed first when chasing on a handful of occasions, which would not happen at City with Haaland.",
-		sources: [{ label: 'Derived from match logs', url: SRC.wikiMadrid }]
+		sources: [{ label: 'FBref — Mbappé match logs', url: SRC.fbrefMbappe }]
 	},
 	team_share: {
 		goals_pct_of_team: 0.33,
@@ -449,13 +449,13 @@ const MBAPPE = {
 		minutes_share_pct: 0.7,
 		summary:
 			"33% of Madrid's La Liga goals — high but not as concentrated as Haaland at City (41%). Madrid's attacking output is more distributed (Vinicius, Bellingham each carry ~15-18% goals share).",
-		sources: [{ label: 'Derived', url: SRC.wikiMadrid }]
+		sources: [{ label: 'FBref statistics', url: SRC.fbrefMbappe }]
 	},
 	contract_signals: {
 		contract_end: '2029',
 		summary:
 			'Free transfer summer 2024. 5-year contract through 2029. Salary share of wage bill estimated at ~12% (top tier alongside Vinicius and Bellingham). #10 shirt change for 25-26 signals system-centrality.',
-		sources: [{ label: 'Wikipedia — Madrid 25-26', url: SRC.wikiMadrid }]
+		sources: [{ label: 'Transfermarkt — Mbappé', url: SRC.tmMbappe }]
 	},
 	match_reports: [
 		{
@@ -485,7 +485,8 @@ const MBAPPE = {
 			manager: 'Álvaro Arbeloa (interim, paraphrased)',
 			quote: 'Kylian is the player around whom we build now.',
 			source: 'Post-Sevilla coverage',
-			source_url: SRC.wikiMadrid
+			source_url:
+				'https://www.sofascore.com/news/kylian-mbappes-2025-26-season-for-real-madrid-and-national-team-relentless-numbers-simple-story'
 		}
 	],
 	scout_notes: [
@@ -493,7 +494,7 @@ const MBAPPE = {
 			author: 'Sid Lowe-style synthesis',
 			date: '2026-05-12',
 			note: "Tale of two halves: difficult opening under Xabi Alonso, Pichichi-leading surge under Arbeloa's pared-back setup. 40+ goals is undeniable. But Tier 1 evidence is awkward: on/off delta is only ~10%, team-share 33%, Madrid trophyless. The framework reads: peak individual output that does not translate to load-bearing club value because Madrid's squad depth absorbs his absence.",
-			source_url: SRC.wikiMadrid
+			source_url: SRC.fbrefMbappe
 		},
 		{
 			author: "Bolavip — Ballon d'Or context",
@@ -528,8 +529,9 @@ export const evidenceFixtures: Record<string, unknown> = {
 		context_notes:
 			'Barcelona 2025-26: La Liga champions for a 2nd consecutive year under Flick (sealed 10 May 2026 at the Bernabéu in a 2-0 Clásico), Supercopa winners, Copa SF exit, UCL QF elimination by Atlético. The intra-club "most valuable" debate: Pedri (Tier 1 on/off-xG delta, progressive-passes share) vs Yamal (Tier 1 goals share, xG-involvement; Tier 2 market consensus #1 globally).',
 		context_sources: [
-			{ label: '2025-26 Barça season', url: SRC.wikiBarca },
-			{ label: 'La Liga 2025-26 wrap', url: SRC.cbsClasico }
+			{ label: 'La Liga 2025-26 wrap (CBS)', url: SRC.cbsClasico },
+			{ label: 'FBref — Pedri', url: SRC.fbrefPedri },
+			{ label: 'FBref — Yamal', url: SRC.fbrefYamal }
 		]
 	},
 	'haaland-mbappe-2024': {
@@ -541,8 +543,9 @@ export const evidenceFixtures: Record<string, unknown> = {
 		context_notes:
 			"Snapshot end-of-season 2025-26 (May 2026). Framework reads: Haaland's Tier 1 evidence (41% team goals share, ~40% on/off scoring delta, Golden Boot in a struggling City) is meaningfully stronger than Mbappé's (33% goals share, ~10% on/off delta, Madrid trophyless). Both produce elite individual numbers; only one translates into structural value-to-club under the framework's evidence hierarchy.",
 		context_sources: [
-			{ label: '2025-26 Real Madrid', url: SRC.wikiMadrid },
-			{ label: 'Erling Haaland', url: SRC.wikiHaaland }
+			{ label: 'FBref — Haaland', url: SRC.fbrefHaaland },
+			{ label: 'FBref — Mbappé', url: SRC.fbrefMbappe },
+			{ label: 'Premier League — Haaland stats', url: SRC.plHaaland }
 		]
 	}
 }
