@@ -19,10 +19,10 @@ const DOSSIER_SCHEMA_URL =
 	'https://raw.githubusercontent.com/gowthamsundaresan/interpretive-markets/main/frameworks/football-player-value-v1/schemas/dossierV1.json'
 
 const FOOTBALL_FRAMEWORK = {
-	id: '0x572f174004cb7791ebb89118750af59e2c7ac93ee5ef6f99bf56616f4686bcab',
-	ipfs: 'ipfs://QmbMiXBZqyy5kgPpkgNVfvBP6HrM6KKNBGwNFFdGQEzo76',
+	id: '0x2dd1e2ce6cd4ab267a061bf3752e72b99e075df022aca1320d12cd75e34e5b2c',
+	ipfs: 'ipfs://QmYYdZQCCVTGFhvzLbiP9FjjVn7zg6XJTwd36RBTefy3N6',
 	slug: 'football-player-value-v1',
-	version: '1.3.0'
+	version: '1.3.1'
 }
 
 // --- Helpers ---
