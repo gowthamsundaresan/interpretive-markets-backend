@@ -1,0 +1,116 @@
+{
+	"id": "2023-24-vinicius-vs-bellingham-madrid",
+	"kind": "judge",
+	"question": "Was Vinicius Jr more valuable to Real Madrid than Jude Bellingham in 2023-24?",
+	"manifest": {
+		"pathPrefix": "dossier://",
+		"subjects": ["Vinicius Jr", "Jude Bellingham"]
+	},
+	"sourceAllowlist": ["https://fbref.com/en/players/", "https://theathletic.com/football/"],
+	"dossier": {
+		"asOf": "2024-05-31",
+		"subjects": {
+			"Vinicius Jr": {
+				"club": "Real Madrid",
+				"position": "LW",
+				"stats": {
+					"appearances_la_liga": 26,
+					"goals_la_liga": 15,
+					"assists_la_liga": 6,
+					"goals_ucl": 6,
+					"sources": [
+						{
+							"label": "FBref Vinicius",
+							"url": "https://fbref.com/en/players/vinicius-2024/",
+							"retrievedAt": "2024-05-31"
+						}
+					]
+				},
+				"on_off_splits": {
+					"with": { "ppg": 2.5 },
+					"without": { "ppg": 2.31 },
+					"sample": { "with_matches": 26, "without_matches": 12 },
+					"delta_summary": "Modest PPG delta; Rodrygo covered.",
+					"sources": [
+						{
+							"label": "The Athletic Madrid",
+							"url": "https://theathletic.com/football/madrid-2024/",
+							"retrievedAt": "2024-05-31"
+						}
+					]
+				},
+				"team_share": {
+					"season_goal_involvement_pct": 27,
+					"sources": [
+						{
+							"label": "FBref share",
+							"url": "https://fbref.com/en/players/vinicius-share/",
+							"retrievedAt": "2024-05-31"
+						}
+					]
+				},
+				"scout_notes": [
+					{
+						"author": "The Athletic — Corrigan",
+						"summary": "Decisive in the UCL knockouts (Man City quarter-final brace) but reduced La Liga role compared with 2022-23."
+					}
+				]
+			},
+			"Jude Bellingham": {
+				"club": "Real Madrid",
+				"position": "CM/AM",
+				"stats": {
+					"appearances_la_liga": 28,
+					"goals_la_liga": 19,
+					"assists_la_liga": 6,
+					"sources": [
+						{
+							"label": "FBref Bellingham",
+							"url": "https://fbref.com/en/players/bellingham-2024/",
+							"retrievedAt": "2024-05-31"
+						}
+					]
+				},
+				"on_off_splits": {
+					"with": { "ppg": 2.54 },
+					"without": { "ppg": 2.2 },
+					"sample": { "with_matches": 28, "without_matches": 10 },
+					"delta_summary": "Larger PPG delta than Vinicius on a comparable sample.",
+					"sources": [
+						{
+							"label": "The Athletic Madrid",
+							"url": "https://theathletic.com/football/madrid-2024/",
+							"retrievedAt": "2024-05-31"
+						}
+					]
+				},
+				"team_share": {
+					"season_goal_involvement_pct": 32,
+					"sources": [
+						{
+							"label": "FBref share",
+							"url": "https://fbref.com/en/players/bellingham-share/",
+							"retrievedAt": "2024-05-31"
+						}
+					]
+				}
+			}
+		},
+		"context_notes": "Mirror of the Bellingham case framed from Vinicius perspective. Vinicius's UCL knockout impact + individual-ceiling case is real but the La Liga delta + team share favor Bellingham."
+	},
+	"expectedFinalOutcome": 0,
+	"expectedVerdict": {
+		"outcome": 0,
+		"confidence_bps": 6400,
+		"driving_tier": 1,
+		"subject_ref": "Jude Bellingham",
+		"citations": [
+			"dossier://subjects.Vinicius Jr.on_off_splits",
+			"dossier://subjects.Jude Bellingham.on_off_splits",
+			"dossier://subjects.Jude Bellingham.team_share"
+		],
+		"rationale_hash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+	},
+	"__uncertain__": true,
+	"__uncertaintyNote__": "Defensible UNCERTAIN — Vinicius's UCL knockout impact (City brace, Bayern brace, Dortmund final goal) is not captured by La Liga on/off splits, and the framework's '2024-25 season' phrasing doesn't fit the UCL run cleanly. A reasonable judge could call this UNCERTAIN. The expectedVerdict says NO based on La Liga data alone — user should review."
+}

@@ -41,7 +41,7 @@ export async function getMarket(request: FastifyRequest, reply: FastifyReply) {
 	const { id } = request.params as { id: string }
 	const market = await prisma.market.findUnique({
 		where: { id: BigInt(id) },
-		include: { verdict: { include: { bundle: true } }, framework: true, judge: true }
+		include: { verdict: true, framework: true }
 	})
 	if (!market) return sendError(reply, 'not_found', `market ${id} not found`)
 	return reply.send(serialize(market))
@@ -50,8 +50,7 @@ export async function getMarket(request: FastifyRequest, reply: FastifyReply) {
 export async function getMarketVerdict(request: FastifyRequest, reply: FastifyReply) {
 	const { id } = request.params as { id: string }
 	const verdict = await prisma.verdict.findUnique({
-		where: { marketId: BigInt(id) },
-		include: { bundle: true }
+		where: { marketId: BigInt(id) }
 	})
 	if (!verdict) return sendError(reply, 'not_found', `no verdict for market ${id}`)
 	return reply.send(serialize(verdict))

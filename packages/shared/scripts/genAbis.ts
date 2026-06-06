@@ -25,8 +25,9 @@ const ABI_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'a
 
 const TARGETS: ContractTarget[] = [
 	{ contract: 'FrameworkRegistry', exportName: 'frameworkRegistryAbi' },
-	{ contract: 'JudgeRegistry', exportName: 'judgeRegistryAbi' },
-	{ contract: 'Market', exportName: 'marketAbi' }
+	{ contract: 'AttestedExecutorRegistry', exportName: 'attestedExecutorRegistryAbi' },
+	{ contract: 'Market', exportName: 'marketAbi' },
+	{ contract: 'RitualSystem', exportName: 'ritualSystemAbi' }
 ]
 
 async function main() {

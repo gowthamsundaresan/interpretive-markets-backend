@@ -1,5 +1,5 @@
-import { reExecuteVerdict } from './reExecuteVerdict'
 import { prisma } from './utils/prismaClient'
+import { verifyAttestation } from './verifyAttestation'
 import { ReExecStatus } from '@interpretive/prisma'
 
 const BATCH_SIZE = 10
@@ -8,7 +8,7 @@ const BATCH_SIZE = 10
 
 export async function checkPendingVerdicts(): Promise<void> {
 	const pending = await prisma.verdict.findMany({
-		where: { reExecStatus: ReExecStatus.pending },
+		where: { auditStatus: ReExecStatus.pending },
 		take: BATCH_SIZE
 	})
 
@@ -17,18 +17,18 @@ export async function checkPendingVerdicts(): Promise<void> {
 		return
 	}
 
-	console.time(`[Verdicts] re-execute size: ${pending.length}`)
+	console.time(`[Verdicts] consistency-audit size: ${pending.length}`)
 	for (const verdict of pending) {
 		try {
-			await reExecuteVerdict(verdict)
+			await verifyAttestation(verdict)
 		} catch (err) {
-			console.log(`[Verdicts] re-exec failed for market ${verdict.marketId}`)
+			console.log(`[Verdicts] audit failed for market ${verdict.marketId}`)
 			console.log(err)
 			await prisma.verdict.update({
 				where: { marketId: verdict.marketId },
-				data: { reExecCheckedAt: new Date() }
+				data: { auditCheckedAt: new Date() }
 			})
 		}
 	}
-	console.timeEnd(`[Verdicts] re-execute size: ${pending.length}`)
+	console.timeEnd(`[Verdicts] consistency-audit size: ${pending.length}`)
 }

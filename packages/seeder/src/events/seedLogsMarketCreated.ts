@@ -48,19 +48,13 @@ export async function seedLogsMarketCreated(toBlock?: bigint, fromBlock?: bigint
 			blockTime: Date
 			marketId: string
 			frameworkId: string
-			judgeImageDigest: string
 			creator: string
 		}[] = []
 
 		for (const log of logs) {
 			const args = (
 				log as unknown as {
-					args: {
-						marketId: bigint
-						frameworkId: `0x${string}`
-						judgeImageDigest: `0x${string}`
-						creator: `0x${string}`
-					}
+					args: { marketId: bigint; frameworkId: `0x${string}`; creator: `0x${string}` }
 				}
 			).args
 			const blockNumber = log.blockNumber ?? 0n
@@ -73,7 +67,6 @@ export async function seedLogsMarketCreated(toBlock?: bigint, fromBlock?: bigint
 				blockTime: blockData.get(blockNumber) ?? new Date(0),
 				marketId: args.marketId.toString(),
 				frameworkId: args.frameworkId,
-				judgeImageDigest: args.judgeImageDigest,
 				creator: args.creator
 			})
 		}
@@ -81,10 +74,7 @@ export async function seedLogsMarketCreated(toBlock?: bigint, fromBlock?: bigint
 		const dbTransactions: DbTransaction[] = []
 		if (rows.length > 0) {
 			dbTransactions.push(
-				prisma.eventLogs_MarketCreated.createMany({
-					data: rows,
-					skipDuplicates: true
-				})
+				prisma.eventLogs_MarketCreated.createMany({ data: rows, skipDuplicates: true })
 			)
 		}
 		dbTransactions.push(saveLastSyncBlockTransaction(SYNC_KEY, windowTo))

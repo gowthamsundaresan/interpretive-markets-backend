@@ -1,0 +1,63 @@
+{
+	"id": "2024-haaland-vs-mbappe",
+	"kind": "judge",
+	"question": "Is Erling Haaland more valuable to Manchester City than Kylian Mbappe is to Real Madrid?",
+	"manifest": {
+		"pathPrefix": "dossier://",
+		"subjects": ["Erling Haaland", "Kylian Mbappe"]
+	},
+	"sourceAllowlist": [
+		"https://fbref.com/en/players/",
+		"https://www.transfermarkt.com/",
+		"https://understat.com/player/"
+	],
+	"dossier": {
+		"asOf": "2024-12-15",
+		"subjects": {
+			"Erling Haaland": {
+				"club": "Manchester City",
+				"position": "ST",
+				"age": 24,
+				"on_off_splits": {
+					"with": { "ppg": 2.45, "xG_per90": 2.8 },
+					"without": { "ppg": 1.62, "xG_per90": 1.9 },
+					"sample": { "with_matches": 38, "without_matches": 12 },
+					"delta_summary": "Team produces 0.83 more PPG with Haaland on; xG drops 32% without."
+				},
+				"team_share": { "season_xg_involvement_pct": 38, "progressive_passes_pct": 9 },
+				"scout_notes": [
+					{
+						"author": "Tifo Football",
+						"summary": "Pure goal threat anchors City's penalty-area structure; replacement requires deep tactical rethink."
+					}
+				]
+			},
+			"Kylian Mbappe": {
+				"club": "Real Madrid",
+				"position": "LW/CF",
+				"age": 26,
+				"on_off_splits": {
+					"with": { "ppg": 2.2, "xG_per90": 2.4 },
+					"without": { "ppg": 2.05, "xG_per90": 2.1 },
+					"sample": { "with_matches": 28, "without_matches": 8 },
+					"delta_summary": "Team produces 0.15 more PPG with Mbappe on; xG marginally higher with."
+				},
+				"team_share": { "season_xg_involvement_pct": 25, "progressive_passes_pct": 12 },
+				"scout_notes": [
+					{
+						"author": "The Athletic",
+						"summary": "Star quality but Madrid's chance-creation machine produces irrespective of any single attacker."
+					}
+				]
+			}
+		},
+		"context_notes": "City's structure is more dependent on a single load-bearing striker; Madrid's depth and chance creation are diffuse."
+	},
+	"expectedFinalOutcome": 1,
+	"expectedVerdict": {
+		"outcome": 1,
+		"confidence_bps": 7200,
+		"driving_tier": 1,
+		"subject_ref": "Erling Haaland"
+	}
+}

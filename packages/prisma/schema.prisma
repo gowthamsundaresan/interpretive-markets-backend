@@ -1,6 +1,6 @@
 generator client {
   provider      = "prisma-client-js"
-  // native = local dev. debian-openssl-3.0.x = node:22-slim images on Fly/EigenCompute/etc.
+  // native = local dev. debian-openssl-3.0.x = node:22-slim Docker images.
   binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
@@ -9,6 +9,8 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
+
+// --- Core domain ---
 
 model Framework {
   id                String   @id
@@ -23,32 +25,46 @@ model Framework {
   createdAt DateTime @default(now())
 }
 
-model Judge {
-  imageDigest       String   @id
-  signer            String
+// Owner-curated allowlist of TEE executor addresses permitted to resolve markets.
+// Replaces the pre-Ritual `Judge` model (image-digest → signer); on Ritual the protocol
+// attests workload identity, and `AttestedExecutorRegistry` overlays the executor allowlist.
+model AttestedExecutor {
+  executor          String   @id
   enabled           Boolean  @default(true)
   registeredAt      DateTime
   registeredAtBlock BigInt   @default(0)
-
-  markets Market[]
 
   createdAt DateTime @default(now())
 }
 
 model Market {
-  id                 BigInt    @id
-  question           String
-  frameworkId        String
-  framework          Framework @relation(fields: [frameworkId], references: [id])
-  judgeDigest        String
-  judge              Judge     @relation(fields: [judgeDigest], references: [imageDigest])
-  modelId            String
-  promptTemplateHash String
-  dataSourceSpec     Bytes
-  resolutionTime     DateTime
-  creator            String
-  createdAt          DateTime  @default(now())
-  createdAtBlock     BigInt    @default(0)
+  id             BigInt    @id
+  question       String
+  frameworkId    String
+  framework      Framework @relation(fields: [frameworkId], references: [id])
+  creator        String
+  createdAt      DateTime  @default(now())
+  createdAtBlock BigInt    @default(0)
+
+  // Ritual L1 MarketInit (Phase 2). Populated by `seedMarkets` from `Market.get(marketId)`.
+  sourceAllowlist   String[] @default([])
+  dossierPathPrefix String   @default("")
+  dossierSubjects   String[] @default([])
+  resolutionTime    DateTime
+  cliType           Int      @default(0)
+  model             String   @default("")
+  maxTurns          Int      @default(0)
+  maxTokens         Int      @default(0)
+  callbackGasLimit  BigInt   @default(0)
+  investigationTtl  BigInt   @default(0)
+
+  // Runtime state from on-chain Market.get(marketId).
+  investigationJobId     String?
+  investigationStartedAt BigInt?
+  dossierCid             String?
+  finalized              Boolean @default(false)
+  malformed              Boolean @default(false)
+  disputed               Boolean @default(false)
 
   verdict Verdict?
 }
@@ -60,36 +76,52 @@ enum ReExecStatus {
 }
 
 model Verdict {
-  marketId      BigInt   @id
-  market        Market   @relation(fields: [marketId], references: [id])
-  outcome       Int
-  // 1e18-scaled, stored as decimal string to avoid float loss
-  confidence    String
-  verdictHash   String
-  bundleRef     String
-  signer        String
-  postedAt      DateTime
-  postedAtBlock BigInt   @default(0)
+  marketId BigInt @id
+  market   Market @relation(fields: [marketId], references: [id])
 
-  reExecStatus    ReExecStatus @default(pending)
-  reExecCheckedAt DateTime?
-  reExecHash      String?
-  disputed        Boolean      @default(false)
+  // Verdict struct (ADR-003 + Phase 2 ResolutionTypes.Verdict).
+  outcome       Int
+  confidenceBps Int
+  drivingTier   Int
+  subjectRef    String
+  rationaleHash String
+  verdictHash   String
+  dossierCid    String
+
+  // Provenance from chain events / receipts.
+  // executor is recorded address(0) on-chain (ADR-005); watcher resolves from receipt off-chain.
+  investigationExecutor        String?
+  investigationAttestedAtBlock BigInt?
+  judgmentExecutor             String?
+  judgmentAttestedAtBlock      BigInt?
+
+  finalizedAt      DateTime
+  finalizedAtBlock BigInt   @default(0)
+
+  // Consistency-audit state (Phase 7 watcher).
+  auditStatus       ReExecStatus @default(pending)
+  auditCheckedAt    DateTime?
+  auditEvidenceHash String?
+
+  // Dispute state — independent of audit (a malformed market can be disputed too).
+  disputed        Boolean   @default(false)
   disputedAt      DateTime?
   disputedAtBlock BigInt?
-
-  bundle ReExecBundle?
 }
 
-model ReExecBundle {
-  marketId       BigInt    @id
-  verdict        Verdict   @relation(fields: [marketId], references: [marketId])
-  ipfsCid        String
-  eigenDABlobKey String?
-  sizeBytes      Int
-  fetchedAt      DateTime?
+// Markets that emitted `MalformedVerdict` and were left challengeable instead of finalized
+// (ADR-009). Separate from `Verdict` so a market either has a verdict OR a malformation, never
+// both ambiguous.
+model MalformedVerdictRecord {
+  marketId       BigInt   @id
+  reason         String
+  emittedAt      DateTime
+  emittedAtBlock BigInt   @default(0)
 
-  createdAt DateTime @default(now())
+  // Same dispute lifecycle as Verdict.
+  disputed        Boolean   @default(false)
+  disputedAt      DateTime?
+  disputedAtBlock BigInt?
 }
 
 model Setting {
@@ -97,6 +129,8 @@ model Setting {
   value     Json
   updatedAt DateTime @updatedAt
 }
+
+// --- Event-log archives — durable source of truth for re-derivation ---
 
 model EventLogs_FrameworkRegistered {
   address          String
@@ -114,7 +148,7 @@ model EventLogs_FrameworkRegistered {
   @@id([transactionHash, transactionIndex])
 }
 
-model EventLogs_JudgeRegistered {
+model EventLogs_ExecutorRegistered {
   address          String
   transactionHash  String
   transactionIndex Int
@@ -122,13 +156,12 @@ model EventLogs_JudgeRegistered {
   blockHash        String
   blockTime        DateTime
 
-  imageDigest String
-  signer      String
+  executor String
 
   @@id([transactionHash, transactionIndex])
 }
 
-model EventLogs_JudgeEnabledSet {
+model EventLogs_ExecutorEnabledSet {
   address          String
   transactionHash  String
   transactionIndex Int
@@ -136,8 +169,8 @@ model EventLogs_JudgeEnabledSet {
   blockHash        String
   blockTime        DateTime
 
-  imageDigest String
-  enabled     Boolean
+  executor String
+  enabled  Boolean
 
   @@id([transactionHash, transactionIndex])
 }
@@ -150,15 +183,14 @@ model EventLogs_MarketCreated {
   blockHash        String
   blockTime        DateTime
 
-  marketId         String
-  frameworkId      String
-  judgeImageDigest String
-  creator          String
+  marketId    String
+  frameworkId String
+  creator     String
 
   @@id([transactionHash, transactionIndex])
 }
 
-model EventLogs_VerdictPosted {
+model EventLogs_InvestigationStarted {
   address          String
   transactionHash  String
   transactionIndex Int
@@ -166,9 +198,95 @@ model EventLogs_VerdictPosted {
   blockHash        String
   blockTime        DateTime
 
-  marketId  String
-  signer    String
-  bundleRef String
+  marketId       String
+  jobId          String
+  requestBinding String
+
+  @@id([transactionHash, transactionIndex])
+}
+
+model EventLogs_InvestigationDelivered {
+  address          String
+  transactionHash  String
+  transactionIndex Int
+  blockNumber      BigInt
+  blockHash        String
+  blockTime        DateTime
+
+  marketId   String
+  jobId      String
+  dossierCid String
+
+  @@id([transactionHash, transactionIndex])
+}
+
+model EventLogs_JudgmentStarted {
+  address          String
+  transactionHash  String
+  transactionIndex Int
+  blockNumber      BigInt
+  blockHash        String
+  blockTime        DateTime
+
+  marketId   String
+  promptHash String
+
+  @@id([transactionHash, transactionIndex])
+}
+
+model EventLogs_JudgmentDelivered {
+  address          String
+  transactionHash  String
+  transactionIndex Int
+  blockNumber      BigInt
+  blockHash        String
+  blockTime        DateTime
+
+  marketId    String
+  verdictHash String
+
+  @@id([transactionHash, transactionIndex])
+}
+
+model EventLogs_HarnessRuleFired {
+  address          String
+  transactionHash  String
+  transactionIndex Int
+  blockNumber      BigInt
+  blockHash        String
+  blockTime        DateTime
+
+  marketId String
+  ruleId   Int
+
+  @@id([transactionHash, transactionIndex])
+}
+
+model EventLogs_MalformedVerdict {
+  address          String
+  transactionHash  String
+  transactionIndex Int
+  blockNumber      BigInt
+  blockHash        String
+  blockTime        DateTime
+
+  marketId String
+  reason   String
+
+  @@id([transactionHash, transactionIndex])
+}
+
+model EventLogs_VerdictFinalized {
+  address          String
+  transactionHash  String
+  transactionIndex Int
+  blockNumber      BigInt
+  blockHash        String
+  blockTime        DateTime
+
+  marketId      String
+  outcome       Int
+  confidenceBps Int
 
   @@id([transactionHash, transactionIndex])
 }

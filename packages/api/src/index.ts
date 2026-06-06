@@ -2,8 +2,8 @@ import { API_VERSION } from './constants'
 import { cacheHook } from './hooks/cache'
 import { rateLimitHook } from './hooks/rateLimit'
 import { register as registerEvidence } from './routes/evidence/evidenceRoutes'
+import { register as registerExecutors } from './routes/executors/executorsRoutes'
 import { register as registerFrameworks } from './routes/frameworks/frameworksRoutes'
-import { register as registerJudges } from './routes/judges/judgesRoutes'
 import { register as registerMarkets } from './routes/markets/marketsRoutes'
 import { envSchema } from './schema/env'
 import fastifyCors from '@fastify/cors'
@@ -27,7 +27,7 @@ server.register(rateLimitHook)
 
 server.register(registerFrameworks, { prefix: `/api/${API_VERSION}/frameworks` })
 server.register(registerMarkets, { prefix: `/api/${API_VERSION}/markets` })
-server.register(registerJudges, { prefix: `/api/${API_VERSION}/judges` })
+server.register(registerExecutors, { prefix: `/api/${API_VERSION}/executors` })
 server.register(registerEvidence, { prefix: `/api/${API_VERSION}/evidence` })
 
 async function start() {

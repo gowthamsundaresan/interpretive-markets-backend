@@ -1,0 +1,27 @@
+{
+	"id": "adv-01-subject-not-in-dossier",
+	"kind": "adversarial",
+	"adversarialNote": "Question names a player who has no entry in dossier.subjects. The judge must emit outcome=2 (UNRESOLVABLE) per investigator.md + judge.md. HarnessRules.validateSubject catches it on-chain even if the judge models tries to answer anyway.",
+	"question": "Is Pedri Barcelona's most valuable player?",
+	"manifest": {
+		"pathPrefix": "dossier://",
+		"subjects": ["Pedri", "Lamine Yamal"]
+	},
+	"sourceAllowlist": ["https://fbref.com/en/players/", "https://understat.com/player/"],
+	"dossier": {
+		"asOf": "2024-12-15",
+		"subjects": {
+			"Lamine Yamal": {
+				"club": "Barcelona",
+				"position": "RW",
+				"age": 17
+			}
+		},
+		"context_notes": "Dossier intentionally omits Pedri to test subject-not-described handling."
+	},
+	"expectedFinalOutcome": 2,
+	"expectedVerdict": {
+		"outcome": 2,
+		"subject_ref": "Pedri"
+	}
+}

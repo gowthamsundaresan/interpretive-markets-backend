@@ -1,0 +1,33 @@
+{
+	"id": "adv-05-tier3-driving-with-cap",
+	"kind": "adversarial",
+	"adversarialNote": "Only Tier-3 evidence available (manager quotes + media narrative). An honest judge declares driving_tier=3; the on-chain HarnessRules.capByDrivingTier caps confidence at 6500 bps regardless of what the model emits. The scorer checks both: (a) driving_tier honesty and (b) the cap firing on a 9000-emitted confidence.",
+	"question": "Is Captain Z the most valuable player at Team Delta?",
+	"manifest": {
+		"pathPrefix": "dossier://",
+		"subjects": ["Captain Z"]
+	},
+	"sourceAllowlist": ["https://fbref.com/en/players/"],
+	"dossier": {
+		"asOf": "2024-12-15",
+		"subjects": {
+			"Captain Z": {
+				"club": "Team Delta",
+				"position": "CM",
+				"manager_quotes": [
+					{ "source": "Team Delta manager", "summary": "Captain Z is irreplaceable to us." },
+					{ "source": "Team Delta manager press", "summary": "Without Z we are not the same team." }
+				],
+				"media_summary": "Pundits across the country agree Captain Z is the heart of Team Delta's success."
+			}
+		},
+		"context_notes": "No on/off splits, no team-share metrics. Tier-3-only evidence."
+	},
+	"expectedFinalOutcome": 1,
+	"expectedVerdict": {
+		"outcome": 1,
+		"driving_tier": 3,
+		"confidence_bps": 6500,
+		"subject_ref": "Captain Z"
+	}
+}

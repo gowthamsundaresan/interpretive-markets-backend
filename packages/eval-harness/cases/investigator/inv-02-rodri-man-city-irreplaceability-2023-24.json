@@ -1,0 +1,92 @@
+{
+	"id": "inv-02-rodri-man-city-irreplaceability-2023-24",
+	"kind": "investigator",
+	"question": "Is Rodri Manchester City's most irreplaceable player in 2023-24?",
+	"manifest": {
+		"pathPrefix": "dossier://",
+		"subjects": ["Rodri"]
+	},
+	"sourceAllowlist": [
+		"https://fbref.com/en/players/",
+		"https://understat.com/player/",
+		"https://www.transfermarkt.com/",
+		"https://theathletic.com/football/",
+		"https://www.opta.com/"
+	],
+	"dossier": {
+		"asOf": "2024-06-01",
+		"subjects": {
+			"Rodri": {
+				"club": "Manchester City",
+				"position": "DM",
+				"age": 27,
+				"season": "2023-24",
+				"stats": {
+					"appearances_premier_league": 34,
+					"goals_premier_league": 8,
+					"assists_premier_league": 7,
+					"minutes_played": 3060,
+					"progressive_passes_per_90": 9.8,
+					"tackles_plus_interceptions_per_90": 4.6,
+					"sources": [
+						{
+							"label": "FBref Rodri 2023-24",
+							"url": "https://fbref.com/en/players/rodri-2024/",
+							"retrievedAt": "2024-06-01"
+						},
+						{
+							"label": "Understat Rodri 2023-24",
+							"url": "https://understat.com/player/rodri-2024/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"on_off_splits": {
+					"with": { "ppg": 2.61, "gd_per_match": 1.58, "win_pct": 0.79 },
+					"without": { "ppg": 1.4, "gd_per_match": 0.2, "win_pct": 0.4 },
+					"sample": { "with_matches": 34, "without_matches": 8 },
+					"delta_summary": "Premier League PPG drops from 2.61 to 1.40 without Rodri (delta = -1.21). The without sample (n=8) is small but the magnitude is the largest reported for any midfielder in the league. Calibration caveat: 'without' includes Wolves loss and the Madrid UCL away leg.",
+					"sources": [
+						{
+							"label": "Opta on/off splits 2023-24",
+							"url": "https://www.opta.com/news/rodri-on-off-splits-2024/",
+							"retrievedAt": "2024-06-01"
+						},
+						{
+							"label": "The Athletic — Rodri irreplaceability",
+							"url": "https://theathletic.com/football/rodri-2024/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"team_share": {
+					"season_passes_pct": 12.4,
+					"progressive_passes_pct": 18,
+					"ball_recoveries_pct": 14,
+					"sources": [
+						{
+							"label": "FBref team share Rodri",
+							"url": "https://fbref.com/en/players/rodri-share/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"scout_notes": [
+					{
+						"author": "The Athletic — Liam Tharme",
+						"summary": "Rodri's positional discipline lets City's full-backs invert and the wide forwards stay 1v1; remove him and the entire territorial press collapses. No squad alternative (Kovacic, Phillips) replicates the receiving-under-pressure profile."
+					}
+				],
+				"manager_quotes": [
+					{
+						"source": "Pep Guardiola post-match Real Madrid 2024-04-09",
+						"summary": "Without Rodri, we lose a player who organises everything. The structure is different."
+					}
+				]
+			}
+		},
+		"context_notes": "Man City won the 2023-24 Premier League title (4th consecutive). Rodri started 34 of 38 league matches. The without-Rodri sample is small (n=8) but spans the full season including high-leverage UCL fixtures. He won the Ballon d'Or in October 2024 reflecting this season."
+	},
+	"groundTruthDossier": null,
+	"__note__": "Investigator case — single-subject (Rodri), tests that single-subject dossiers pass the balance scorer (only one subject is the question framing). All five structural scorers expected to PASS."
+}

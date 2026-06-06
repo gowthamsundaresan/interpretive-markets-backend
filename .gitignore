@@ -7,5 +7,7 @@ dist/
 .vscode/
 .idea/
 packages/prisma/src/generated/
+packages/eval-harness/reports/
+packages/eval-harness/src/judge-validation/human-labels.json
 *.tsbuildinfo
 fly.*.toml

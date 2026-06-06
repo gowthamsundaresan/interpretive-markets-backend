@@ -8,12 +8,25 @@ export const marketAbi = [
 				internalType: 'contract IFrameworkRegistry'
 			},
 			{
-				name: '_judgeRegistry',
+				name: '_ritualSystem',
 				type: 'address',
-				internalType: 'contract IJudgeRegistry'
+				internalType: 'contract IRitualSystem'
 			}
 		],
 		stateMutability: 'nonpayable'
+	},
+	{
+		type: 'function',
+		name: 'asyncDelivery',
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'address',
+				internalType: 'address'
+			}
+		],
+		stateMutability: 'view'
 	},
 	{
 		type: 'function',
@@ -35,19 +48,19 @@ export const marketAbi = [
 						internalType: 'bytes32'
 					},
 					{
-						name: 'dataSourceSpec',
-						type: 'bytes',
-						internalType: 'bytes'
+						name: 'sourceAllowlist',
+						type: 'string[]',
+						internalType: 'string[]'
 					},
 					{
-						name: 'modelId',
-						type: 'bytes32',
-						internalType: 'bytes32'
+						name: 'dossierPathPrefix',
+						type: 'string',
+						internalType: 'string'
 					},
 					{
-						name: 'promptTemplateHash',
-						type: 'bytes32',
-						internalType: 'bytes32'
+						name: 'dossierSubjects',
+						type: 'string[]',
+						internalType: 'string[]'
 					},
 					{
 						name: 'resolutionTime',
@@ -55,9 +68,34 @@ export const marketAbi = [
 						internalType: 'uint64'
 					},
 					{
-						name: 'judgeImageDigest',
-						type: 'bytes32',
-						internalType: 'bytes32'
+						name: 'cliType',
+						type: 'uint16',
+						internalType: 'uint16'
+					},
+					{
+						name: 'model',
+						type: 'string',
+						internalType: 'string'
+					},
+					{
+						name: 'maxTurns',
+						type: 'uint16',
+						internalType: 'uint16'
+					},
+					{
+						name: 'maxTokens',
+						type: 'uint32',
+						internalType: 'uint32'
+					},
+					{
+						name: 'callbackGasLimit',
+						type: 'uint256',
+						internalType: 'uint256'
+					},
+					{
+						name: 'investigationTtl',
+						type: 'uint256',
+						internalType: 'uint256'
 					}
 				]
 			}
@@ -73,7 +111,7 @@ export const marketAbi = [
 	},
 	{
 		type: 'function',
-		name: 'disputeVerdict',
+		name: 'disputeAttestation',
 		inputs: [
 			{
 				name: 'marketId',
@@ -134,19 +172,19 @@ export const marketAbi = [
 								internalType: 'bytes32'
 							},
 							{
-								name: 'dataSourceSpec',
-								type: 'bytes',
-								internalType: 'bytes'
+								name: 'sourceAllowlist',
+								type: 'string[]',
+								internalType: 'string[]'
 							},
 							{
-								name: 'modelId',
-								type: 'bytes32',
-								internalType: 'bytes32'
+								name: 'dossierPathPrefix',
+								type: 'string',
+								internalType: 'string'
 							},
 							{
-								name: 'promptTemplateHash',
-								type: 'bytes32',
-								internalType: 'bytes32'
+								name: 'dossierSubjects',
+								type: 'string[]',
+								internalType: 'string[]'
 							},
 							{
 								name: 'resolutionTime',
@@ -154,9 +192,34 @@ export const marketAbi = [
 								internalType: 'uint64'
 							},
 							{
-								name: 'judgeImageDigest',
-								type: 'bytes32',
-								internalType: 'bytes32'
+								name: 'cliType',
+								type: 'uint16',
+								internalType: 'uint16'
+							},
+							{
+								name: 'model',
+								type: 'string',
+								internalType: 'string'
+							},
+							{
+								name: 'maxTurns',
+								type: 'uint16',
+								internalType: 'uint16'
+							},
+							{
+								name: 'maxTokens',
+								type: 'uint32',
+								internalType: 'uint32'
+							},
+							{
+								name: 'callbackGasLimit',
+								type: 'uint256',
+								internalType: 'uint256'
+							},
+							{
+								name: 'investigationTtl',
+								type: 'uint256',
+								internalType: 'uint256'
 							}
 						]
 					},
@@ -171,6 +234,21 @@ export const marketAbi = [
 						internalType: 'uint64'
 					},
 					{
+						name: 'investigationJobId',
+						type: 'bytes32',
+						internalType: 'bytes32'
+					},
+					{
+						name: 'investigationStartedAt',
+						type: 'uint64',
+						internalType: 'uint64'
+					},
+					{
+						name: 'dossierCid',
+						type: 'string',
+						internalType: 'string'
+					},
+					{
 						name: 'verdict',
 						type: 'tuple',
 						internalType: 'struct ResolutionTypes.Verdict',
@@ -181,26 +259,56 @@ export const marketAbi = [
 								internalType: 'uint8'
 							},
 							{
-								name: 'confidence',
-								type: 'uint256',
-								internalType: 'uint256'
+								name: 'confidenceBps',
+								type: 'uint16',
+								internalType: 'uint16'
+							},
+							{
+								name: 'drivingTier',
+								type: 'uint8',
+								internalType: 'uint8'
+							},
+							{
+								name: 'subjectRef',
+								type: 'string',
+								internalType: 'string'
+							},
+							{
+								name: 'rationaleHash',
+								type: 'bytes32',
+								internalType: 'bytes32'
 							},
 							{
 								name: 'verdictHash',
 								type: 'bytes32',
 								internalType: 'bytes32'
+							},
+							{
+								name: 'dossierCid',
+								type: 'string',
+								internalType: 'string'
+							},
+							{
+								name: 'executor',
+								type: 'address',
+								internalType: 'address'
+							},
+							{
+								name: 'attestedAtBlock',
+								type: 'uint64',
+								internalType: 'uint64'
 							}
 						]
 					},
 					{
-						name: 'bundleRef',
-						type: 'string',
-						internalType: 'string'
+						name: 'finalized',
+						type: 'bool',
+						internalType: 'bool'
 					},
 					{
-						name: 'resolvedAt',
-						type: 'uint64',
-						internalType: 'uint64'
+						name: 'malformed',
+						type: 'bool',
+						internalType: 'bool'
 					},
 					{
 						name: 'disputed',
@@ -214,13 +322,19 @@ export const marketAbi = [
 	},
 	{
 		type: 'function',
-		name: 'judgeRegistry',
-		inputs: [],
+		name: 'marketIdForJob',
+		inputs: [
+			{
+				name: 'jobId',
+				type: 'bytes32',
+				internalType: 'bytes32'
+			}
+		],
 		outputs: [
 			{
-				name: '',
-				type: 'address',
-				internalType: 'contract IJudgeRegistry'
+				name: 'marketId',
+				type: 'uint256',
+				internalType: 'uint256'
 			}
 		],
 		stateMutability: 'view'
@@ -240,17 +354,37 @@ export const marketAbi = [
 	},
 	{
 		type: 'function',
-		name: 'resolve',
+		name: 'onSovereignAgentResult',
 		inputs: [
 			{
-				name: 'marketId',
-				type: 'uint256',
-				internalType: 'uint256'
+				name: 'jobId',
+				type: 'bytes32',
+				internalType: 'bytes32'
 			},
 			{
-				name: 'verdict',
+				name: 'result',
+				type: 'bytes',
+				internalType: 'bytes'
+			}
+		],
+		outputs: [],
+		stateMutability: 'nonpayable'
+	},
+	{
+		type: 'function',
+		name: 'parseVerdictPayload',
+		inputs: [
+			{
+				name: 'completionData',
+				type: 'bytes',
+				internalType: 'bytes'
+			}
+		],
+		outputs: [
+			{
+				name: 'parsed',
 				type: 'tuple',
-				internalType: 'struct ResolutionTypes.Verdict',
+				internalType: 'struct ResolutionTypes.ParsedVerdict',
 				components: [
 					{
 						name: 'outcome',
@@ -258,30 +392,186 @@ export const marketAbi = [
 						internalType: 'uint8'
 					},
 					{
-						name: 'confidence',
-						type: 'uint256',
-						internalType: 'uint256'
+						name: 'confidenceBps',
+						type: 'uint16',
+						internalType: 'uint16'
 					},
 					{
-						name: 'verdictHash',
+						name: 'drivingTier',
+						type: 'uint8',
+						internalType: 'uint8'
+					},
+					{
+						name: 'subjectRef',
+						type: 'string',
+						internalType: 'string'
+					},
+					{
+						name: 'citations',
+						type: 'string[]',
+						internalType: 'string[]'
+					},
+					{
+						name: 'rationaleHash',
 						type: 'bytes32',
 						internalType: 'bytes32'
 					}
 				]
-			},
+			}
+		],
+		stateMutability: 'pure'
+	},
+	{
+		type: 'function',
+		name: 'ritualSystem',
+		inputs: [],
+		outputs: [
 			{
-				name: 'bundleRef',
-				type: 'string',
-				internalType: 'string'
-			},
+				name: '',
+				type: 'address',
+				internalType: 'contract IRitualSystem'
+			}
+		],
+		stateMutability: 'view'
+	},
+	{
+		type: 'function',
+		name: 'startInvestigation',
+		inputs: [
 			{
-				name: 'signature',
-				type: 'bytes',
-				internalType: 'bytes'
+				name: 'marketId',
+				type: 'uint256',
+				internalType: 'uint256'
 			}
 		],
 		outputs: [],
 		stateMutability: 'nonpayable'
+	},
+	{
+		type: 'event',
+		name: 'HarnessRuleFired',
+		inputs: [
+			{
+				name: 'marketId',
+				type: 'uint256',
+				indexed: true,
+				internalType: 'uint256'
+			},
+			{
+				name: 'ruleId',
+				type: 'uint8',
+				indexed: false,
+				internalType: 'uint8'
+			}
+		],
+		anonymous: false
+	},
+	{
+		type: 'event',
+		name: 'InvestigationDelivered',
+		inputs: [
+			{
+				name: 'marketId',
+				type: 'uint256',
+				indexed: true,
+				internalType: 'uint256'
+			},
+			{
+				name: 'jobId',
+				type: 'bytes32',
+				indexed: true,
+				internalType: 'bytes32'
+			},
+			{
+				name: 'dossierCid',
+				type: 'string',
+				indexed: false,
+				internalType: 'string'
+			}
+		],
+		anonymous: false
+	},
+	{
+		type: 'event',
+		name: 'InvestigationStarted',
+		inputs: [
+			{
+				name: 'marketId',
+				type: 'uint256',
+				indexed: true,
+				internalType: 'uint256'
+			},
+			{
+				name: 'jobId',
+				type: 'bytes32',
+				indexed: true,
+				internalType: 'bytes32'
+			},
+			{
+				name: 'requestBinding',
+				type: 'bytes32',
+				indexed: false,
+				internalType: 'bytes32'
+			}
+		],
+		anonymous: false
+	},
+	{
+		type: 'event',
+		name: 'JudgmentDelivered',
+		inputs: [
+			{
+				name: 'marketId',
+				type: 'uint256',
+				indexed: true,
+				internalType: 'uint256'
+			},
+			{
+				name: 'verdictHash',
+				type: 'bytes32',
+				indexed: false,
+				internalType: 'bytes32'
+			}
+		],
+		anonymous: false
+	},
+	{
+		type: 'event',
+		name: 'JudgmentStarted',
+		inputs: [
+			{
+				name: 'marketId',
+				type: 'uint256',
+				indexed: true,
+				internalType: 'uint256'
+			},
+			{
+				name: 'promptHash',
+				type: 'bytes32',
+				indexed: false,
+				internalType: 'bytes32'
+			}
+		],
+		anonymous: false
+	},
+	{
+		type: 'event',
+		name: 'MalformedVerdict',
+		inputs: [
+			{
+				name: 'marketId',
+				type: 'uint256',
+				indexed: true,
+				internalType: 'uint256'
+			},
+			{
+				name: 'reason',
+				type: 'string',
+				indexed: false,
+				internalType: 'string'
+			}
+		],
+		anonymous: false
 	},
 	{
 		type: 'event',
@@ -295,12 +585,6 @@ export const marketAbi = [
 			},
 			{
 				name: 'frameworkId',
-				type: 'bytes32',
-				indexed: true,
-				internalType: 'bytes32'
-			},
-			{
-				name: 'judgeImageDigest',
 				type: 'bytes32',
 				indexed: true,
 				internalType: 'bytes32'
@@ -341,7 +625,7 @@ export const marketAbi = [
 	},
 	{
 		type: 'event',
-		name: 'VerdictPosted',
+		name: 'VerdictFinalized',
 		inputs: [
 			{
 				name: 'marketId',
@@ -350,16 +634,16 @@ export const marketAbi = [
 				internalType: 'uint256'
 			},
 			{
-				name: 'signer',
-				type: 'address',
-				indexed: true,
-				internalType: 'address'
+				name: 'outcome',
+				type: 'uint8',
+				indexed: false,
+				internalType: 'uint8'
 			},
 			{
-				name: 'bundleRef',
-				type: 'string',
+				name: 'confidenceBps',
+				type: 'uint16',
 				indexed: false,
-				internalType: 'string'
+				internalType: 'uint16'
 			}
 		],
 		anonymous: false
@@ -377,7 +661,7 @@ export const marketAbi = [
 	},
 	{
 		type: 'error',
-		name: 'AlreadyResolved',
+		name: 'AlreadyFinalized',
 		inputs: [
 			{
 				name: 'marketId',
@@ -388,15 +672,15 @@ export const marketAbi = [
 	},
 	{
 		type: 'error',
-		name: 'ECDSAInvalidSignature',
+		name: 'InvalidResolutionTime',
 		inputs: []
 	},
 	{
 		type: 'error',
-		name: 'ECDSAInvalidSignatureLength',
+		name: 'InvestigationAlreadyStarted',
 		inputs: [
 			{
-				name: 'length',
+				name: 'marketId',
 				type: 'uint256',
 				internalType: 'uint256'
 			}
@@ -404,19 +688,35 @@ export const marketAbi = [
 	},
 	{
 		type: 'error',
-		name: 'ECDSAInvalidSignatureS',
+		name: 'InvestigationNotStarted',
 		inputs: [
 			{
-				name: 's',
-				type: 'bytes32',
-				internalType: 'bytes32'
+				name: 'marketId',
+				type: 'uint256',
+				internalType: 'uint256'
 			}
 		]
 	},
 	{
 		type: 'error',
-		name: 'InvalidResolutionTime',
-		inputs: []
+		name: 'JobIdMismatch',
+		inputs: [
+			{
+				name: 'marketId',
+				type: 'uint256',
+				internalType: 'uint256'
+			},
+			{
+				name: 'expected',
+				type: 'bytes32',
+				internalType: 'bytes32'
+			},
+			{
+				name: 'received',
+				type: 'bytes32',
+				internalType: 'bytes32'
+			}
+		]
 	},
 	{
 		type: 'error',
@@ -428,6 +728,11 @@ export const marketAbi = [
 				internalType: 'uint256'
 			}
 		]
+	},
+	{
+		type: 'error',
+		name: 'ParsingFailed',
+		inputs: []
 	},
 	{
 		type: 'error',
@@ -447,10 +752,10 @@ export const marketAbi = [
 	},
 	{
 		type: 'error',
-		name: 'UnauthorizedSigner',
+		name: 'Unauthorized',
 		inputs: [
 			{
-				name: 'recovered',
+				name: 'caller',
 				type: 'address',
 				internalType: 'address'
 			}
@@ -462,17 +767,6 @@ export const marketAbi = [
 		inputs: [
 			{
 				name: 'frameworkId',
-				type: 'bytes32',
-				internalType: 'bytes32'
-			}
-		]
-	},
-	{
-		type: 'error',
-		name: 'UnknownJudge',
-		inputs: [
-			{
-				name: 'imageDigest',
 				type: 'bytes32',
 				internalType: 'bytes32'
 			}

@@ -1,0 +1,125 @@
+{
+	"id": "inv-01-bellingham-real-madrid-2023-24",
+	"kind": "investigator",
+	"question": "Is Jude Bellingham Real Madrid's most valuable player in the 2023-24 season?",
+	"manifest": {
+		"pathPrefix": "dossier://",
+		"subjects": ["Jude Bellingham", "Vinicius Jr"]
+	},
+	"sourceAllowlist": [
+		"https://fbref.com/en/players/",
+		"https://understat.com/player/",
+		"https://www.transfermarkt.com/",
+		"https://theathletic.com/football/"
+	],
+	"dossier": {
+		"asOf": "2024-06-01",
+		"subjects": {
+			"Jude Bellingham": {
+				"club": "Real Madrid",
+				"position": "CM/AM",
+				"age": 20,
+				"season": "2023-24",
+				"stats": {
+					"appearances_la_liga": 28,
+					"goals_la_liga": 19,
+					"assists_la_liga": 6,
+					"goals_per_90": 0.74,
+					"xg_per_90": 0.51,
+					"sources": [
+						{
+							"label": "FBref Bellingham 2023-24",
+							"url": "https://fbref.com/en/players/bellingham-2024/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"on_off_splits": {
+					"with": { "ppg": 2.54, "gd_per_match": 1.42 },
+					"without": { "ppg": 2.2, "gd_per_match": 1.05 },
+					"sample": { "with_matches": 28, "without_matches": 10 },
+					"delta_summary": "PPG +0.34 with Bellingham on a 28-vs-10 sample, but the without window includes UCL knockout rotations and isn't fully comparable.",
+					"sources": [
+						{
+							"label": "The Athletic Madrid 2023-24 splits",
+							"url": "https://theathletic.com/football/madrid-splits/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"team_share": {
+					"season_xg_involvement_pct": 32,
+					"progressive_passes_pct": 14,
+					"shots_pct": 18,
+					"sources": [
+						{
+							"label": "FBref team share",
+							"url": "https://fbref.com/en/players/bellingham-share/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"scout_notes": [
+					{
+						"author": "The Athletic — Mark Carey",
+						"summary": "Bellingham reshaped Madrid's structure — Ancelotti drops him into the left half-space to overload the build-up; output numbers are downstream of a structural role no one else could play this season."
+					}
+				]
+			},
+			"Vinicius Jr": {
+				"club": "Real Madrid",
+				"position": "LW",
+				"age": 23,
+				"season": "2023-24",
+				"stats": {
+					"appearances_la_liga": 26,
+					"goals_la_liga": 15,
+					"assists_la_liga": 6,
+					"goals_per_90": 0.62,
+					"xg_per_90": 0.48,
+					"sources": [
+						{
+							"label": "FBref Vinicius 2023-24",
+							"url": "https://fbref.com/en/players/vinicius-2024/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"on_off_splits": {
+					"with": { "ppg": 2.5, "gd_per_match": 1.38 },
+					"without": { "ppg": 2.31, "gd_per_match": 1.18 },
+					"sample": { "with_matches": 26, "without_matches": 12 },
+					"delta_summary": "PPG +0.19 — smaller than Bellingham's delta on a comparable sample; Madrid's attack absorbs Vinicius absences via Rodrygo.",
+					"sources": [
+						{
+							"label": "The Athletic Madrid 2023-24 splits",
+							"url": "https://theathletic.com/football/madrid-splits/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"team_share": {
+					"season_xg_involvement_pct": 27,
+					"progressive_passes_pct": 9,
+					"shots_pct": 22,
+					"sources": [
+						{
+							"label": "FBref team share",
+							"url": "https://fbref.com/en/players/vinicius-share/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"scout_notes": [
+					{
+						"author": "The Athletic — Dermot Corrigan",
+						"summary": "Vinicius remains Madrid's most lethal individual threat in transition but the team has explicitly diversified output sources this season; not the load-bearing player he was in 2022-23."
+					}
+				]
+			}
+		},
+		"context_notes": "Real Madrid won La Liga + UCL in 2023-24, lost zero La Liga matches. The 'without' samples are small for both players and skewed by competition (rotation in UCL knockouts vs. fielded lineups in La Liga). Both players' on/off deltas favor Bellingham; Vinicius's role narrowed from a 2022-23 system-anchor to a 2023-24 specialist."
+	},
+	"groundTruthDossier": null,
+	"__note__": "Investigator case — scores the dossier against the structural scorers (completeness, citations, balance, schema, source-trust). Designed to PASS all five: both subjects have Tier-1 fields with sources, all URLs are within the allowlist, schema is well-formed, coverage is balanced."
+}

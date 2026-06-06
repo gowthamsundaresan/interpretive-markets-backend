@@ -1,0 +1,81 @@
+{
+	"id": "inv-03-palmer-chelsea-2023-24",
+	"kind": "investigator",
+	"question": "Is Cole Palmer Chelsea's most valuable player in 2023-24?",
+	"manifest": {
+		"pathPrefix": "dossier://",
+		"subjects": ["Cole Palmer"]
+	},
+	"sourceAllowlist": [
+		"https://fbref.com/en/players/",
+		"https://understat.com/player/",
+		"https://www.transfermarkt.com/",
+		"https://theathletic.com/football/"
+	],
+	"dossier": {
+		"asOf": "2024-06-01",
+		"subjects": {
+			"Cole Palmer": {
+				"club": "Chelsea",
+				"position": "RW/AM",
+				"age": 21,
+				"season": "2023-24",
+				"stats": {
+					"appearances_premier_league": 33,
+					"goals_premier_league": 22,
+					"assists_premier_league": 11,
+					"penalties_taken": 9,
+					"penalty_conversion_pct": 100,
+					"xg_per_90": 0.61,
+					"xa_per_90": 0.32,
+					"sources": [
+						{
+							"label": "FBref Palmer 2023-24",
+							"url": "https://fbref.com/en/players/palmer-2024/",
+							"retrievedAt": "2024-06-01"
+						},
+						{
+							"label": "Understat Palmer 2023-24",
+							"url": "https://understat.com/player/palmer-2024/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"on_off_splits": {
+					"with": { "ppg": 1.79, "gd_per_match": 0.42 },
+					"without": { "ppg": 1.2, "gd_per_match": -0.2 },
+					"sample": { "with_matches": 33, "without_matches": 5 },
+					"delta_summary": "Chelsea were ~0.6 PPG worse without Palmer, who started 33 of 38 league matches. Sample without him is thin (n=5).",
+					"sources": [
+						{
+							"label": "The Athletic Chelsea splits",
+							"url": "https://theathletic.com/football/chelsea-splits-2024/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"team_share": {
+					"season_goal_involvement_pct": 41,
+					"shots_pct": 28,
+					"key_passes_pct": 24,
+					"sources": [
+						{
+							"label": "FBref Palmer team share",
+							"url": "https://fbref.com/en/players/palmer-share/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"scout_notes": [
+					{
+						"author": "The Athletic — Liam Twomey",
+						"summary": "Palmer was Chelsea's first-choice penalty taker, first-choice free-kick taker, and primary creator from a free 8/10 role. No squad teammate combined volume + efficiency at his level — Nkunku injured, Sterling fading, Mudryk inconsistent."
+					}
+				]
+			}
+		},
+		"context_notes": "Chelsea finished 6th in the Premier League under Pochettino with a 22-goal, 11-assist season from Palmer that accounted for ~41% of their league goal involvements. Palmer's team-share dominance over a single non-elite roster makes this a clean valuation case."
+	},
+	"groundTruthDossier": null,
+	"__note__": "Investigator case — exercises high team-share single-subject dossier. Tests citation density (multiple sources per Tier-1 field)."
+}

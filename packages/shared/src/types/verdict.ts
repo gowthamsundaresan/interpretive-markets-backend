@@ -1,38 +1,62 @@
-// --- Types ---
+// --- Types & state ---
 
 export type VerdictOutcome = 0 | 1 | 2 // 0=NO, 1=YES, 2=UNRESOLVABLE
 
-export interface OnChainVerdict {
-	outcome: VerdictOutcome
-	confidence: bigint // 1e18-scaled
-	verdictHash: `0x${string}`
-}
+export type DrivingTier = 1 | 2 | 3
 
+// Wire shape emitted by the judge model (0x0802 completionData payload).
+// Confidence is encoded as basis points 0–10000 to avoid Solidity float math
+// (ADR-003). Rationale text is kept off-chain; only its keccak256 hash is bound
+// on-chain (ADR-009).
 export interface VerdictPayload {
 	outcome: VerdictOutcome
-	confidence: number // 0..1 in the application JSON
-	reasoning: string
-	scorecard?: Record<string, Record<string, number>>
+	confidence_bps: number
+	driving_tier: DrivingTier
+	subject_ref: string
+	citations: readonly string[]
+	rationale_hash: `0x${string}`
 }
 
-export interface ReExecBundle {
+// Mirror of the on-chain Market.verdicts[marketId] storage layout (Phase 2 shape).
+export interface OnChainVerdict {
+	outcome: VerdictOutcome
+	confidenceBps: number
+	drivingTier: DrivingTier
+	subjectRef: string
+	rationaleHash: `0x${string}`
+	verdictHash: `0x${string}`
+	dossierCid: string
+	executor: `0x${string}`
+}
+
+// Pinned per resolved market (PLAN.md §6). All fields are content-addressable so
+// the watcher can reconstruct and audit the resolution from chain + IPFS alone.
+export interface AuditBundle {
 	marketId: bigint
-	frameworkTarballSha256: `0x${string}`
-	notarizedData: unknown
-	prompt: {
-		system: string
-		user: string
-		assembledSha256: `0x${string}`
+	frameworkCid: string
+	dossierCid: string
+	question: string
+	sourceAllowlist: readonly string[]
+	investigation: {
+		jobId: `0x${string}`
+		requestBinding: `0x${string}`
+		executor: `0x${string}`
+		attestedAtBlock: bigint
 	}
-	eigenAi: {
-		model: string
+	judgment: {
+		assembledPromptSha256: `0x${string}`
 		sampling: {
+			model: string
 			temperature: number
 			topP: number
 			seed: number
-			maxTokens: number
+			maxCompletionTokens: number
+			reasoningEffort?: string
 		}
-		responseId?: string
+		rawCompletionData: `0x${string}`
+		requestBinding: `0x${string}`
+		executor: `0x${string}`
+		attestedAtBlock: bigint
 	}
 	verdictPayload: VerdictPayload
 	onChainVerdict: OnChainVerdict

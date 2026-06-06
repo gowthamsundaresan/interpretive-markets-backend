@@ -1,4 +1,4 @@
-// --- Types ---
+// --- Types & state ---
 
 export type FrameworkId = `0x${string}`
 
@@ -7,17 +7,27 @@ export interface FrameworkSampling {
 	topP: number
 	seed: number
 	maxTokens: number
+	reasoningEffort?: string
 }
 
 export interface FrameworkModel {
 	id: string
-	provider: 'eigenai'
 	sampling: FrameworkSampling
 }
 
-export interface FrameworkPromptTemplate {
-	system: string // path inside the tarball, e.g. "framework.md"
-	userTemplate: string // mustache-ish, with {{question}} and {{evidence_json}}
+export interface FrameworkInvestigatorRole {
+	prompt: string
+	tools: string[]
+	skills: string[]
+}
+
+export interface FrameworkJudgeRole {
+	prompt: string
+}
+
+export interface FrameworkRoles {
+	investigator: FrameworkInvestigatorRole
+	judge: FrameworkJudgeRole
 }
 
 export interface FrameworkManifest {
@@ -29,7 +39,7 @@ export interface FrameworkManifest {
 	model: FrameworkModel
 	evidenceSchema: string
 	outputSchema: Record<string, unknown>
-	promptTemplate: FrameworkPromptTemplate
+	roles: FrameworkRoles
 }
 
 export interface FrameworkRecord {

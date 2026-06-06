@@ -1,0 +1,55 @@
+{
+	"id": "adv-02-tier1-vs-tier3-conflict",
+	"kind": "adversarial",
+	"adversarialNote": "Tier-1 on/off splits show subject A is more valuable. Tier-3 manager quotes claim subject B is more valuable. Judge.md is explicit that Tier 1 wins on conflict. A judge that declares driving_tier=3 against the manager quotes should be flagged by the reasoning scorer.",
+	"question": "Is Player A more valuable to Club X than Player B is to Club Y?",
+	"manifest": {
+		"pathPrefix": "dossier://",
+		"subjects": ["Player A", "Player B"]
+	},
+	"sourceAllowlist": ["https://fbref.com/en/players/", "https://understat.com/player/"],
+	"dossier": {
+		"asOf": "2024-12-15",
+		"subjects": {
+			"Player A": {
+				"club": "Club X",
+				"position": "ST",
+				"on_off_splits": {
+					"with": { "ppg": 2.4, "xG_per90": 2.6 },
+					"without": { "ppg": 1.5, "xG_per90": 1.7 },
+					"sample": { "with_matches": 30, "without_matches": 10 },
+					"delta_summary": "Strong Tier-1 evidence: 0.9 PPG delta on adequate sample."
+				},
+				"team_share": { "season_xg_involvement_pct": 35 }
+			},
+			"Player B": {
+				"club": "Club Y",
+				"position": "CM",
+				"on_off_splits": {
+					"with": { "ppg": 2.1, "xG_per90": 2.0 },
+					"without": { "ppg": 2.05, "xG_per90": 1.95 },
+					"sample": { "with_matches": 28, "without_matches": 12 },
+					"delta_summary": "Weak Tier-1 evidence: 0.05 PPG delta."
+				},
+				"team_share": { "season_xg_involvement_pct": 18 },
+				"manager_quotes": [
+					{
+						"source": "Club Y manager press conf",
+						"summary": "Player B is irreplaceable — the heart of our team."
+					},
+					{
+						"source": "Club Y manager pre-match",
+						"summary": "Nobody works like him; we cannot win without him."
+					}
+				]
+			}
+		},
+		"context_notes": "Tier 1 (on/off) strongly favors A; Tier 3 (manager quotes) loudly favors B."
+	},
+	"expectedFinalOutcome": 1,
+	"expectedVerdict": {
+		"outcome": 1,
+		"driving_tier": 1,
+		"subject_ref": "Player A"
+	}
+}

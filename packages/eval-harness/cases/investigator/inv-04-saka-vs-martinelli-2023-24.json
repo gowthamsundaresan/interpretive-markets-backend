@@ -1,0 +1,127 @@
+{
+	"id": "inv-04-saka-vs-martinelli-2023-24",
+	"kind": "investigator",
+	"question": "Is Bukayo Saka more valuable to Arsenal than Gabriel Martinelli in 2023-24?",
+	"manifest": {
+		"pathPrefix": "dossier://",
+		"subjects": ["Bukayo Saka", "Gabriel Martinelli"]
+	},
+	"sourceAllowlist": [
+		"https://fbref.com/en/players/",
+		"https://understat.com/player/",
+		"https://www.transfermarkt.com/",
+		"https://theathletic.com/football/"
+	],
+	"dossier": {
+		"asOf": "2024-06-01",
+		"subjects": {
+			"Bukayo Saka": {
+				"club": "Arsenal",
+				"position": "RW",
+				"age": 22,
+				"season": "2023-24",
+				"stats": {
+					"appearances_premier_league": 35,
+					"goals_premier_league": 16,
+					"assists_premier_league": 9,
+					"xg_per_90": 0.42,
+					"xa_per_90": 0.28,
+					"minutes_played": 2890,
+					"sources": [
+						{
+							"label": "FBref Saka 2023-24",
+							"url": "https://fbref.com/en/players/saka-2024/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"on_off_splits": {
+					"with": { "ppg": 2.32, "gd_per_match": 1.18 },
+					"without": { "ppg": 1.67, "gd_per_match": 0.33 },
+					"sample": { "with_matches": 35, "without_matches": 3 },
+					"delta_summary": "PPG +0.65 with Saka but the without sample is tiny (n=3); not enough to be conclusive on irreplaceability.",
+					"sources": [
+						{
+							"label": "Opta Arsenal splits 2023-24",
+							"url": "https://www.opta.com/news/arsenal-splits-2024/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"team_share": {
+					"season_goal_involvement_pct": 26,
+					"key_passes_pct": 18,
+					"shots_pct": 19,
+					"sources": [
+						{
+							"label": "FBref Saka team share",
+							"url": "https://fbref.com/en/players/saka-share/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"scout_notes": [
+					{
+						"author": "The Athletic — Art de Roché",
+						"summary": "Saka was Arsenal's primary right-side outlet; minutes near-ironman (35 starts) reflect Arteta's lack of trust in alternatives (Nelson). Goal involvement consistent across the season with no slump."
+					}
+				]
+			},
+			"Gabriel Martinelli": {
+				"club": "Arsenal",
+				"position": "LW",
+				"age": 22,
+				"season": "2023-24",
+				"stats": {
+					"appearances_premier_league": 30,
+					"goals_premier_league": 6,
+					"assists_premier_league": 6,
+					"xg_per_90": 0.32,
+					"xa_per_90": 0.18,
+					"minutes_played": 2210,
+					"sources": [
+						{
+							"label": "FBref Martinelli 2023-24",
+							"url": "https://fbref.com/en/players/martinelli-2024/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"on_off_splits": {
+					"with": { "ppg": 2.2, "gd_per_match": 1.1 },
+					"without": { "ppg": 2.13, "gd_per_match": 0.88 },
+					"sample": { "with_matches": 30, "without_matches": 8 },
+					"delta_summary": "Minimal on/off delta. Trossard's strong form covered Martinelli's absences and partly his minutes.",
+					"sources": [
+						{
+							"label": "Opta Arsenal splits 2023-24",
+							"url": "https://www.opta.com/news/arsenal-splits-2024/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"team_share": {
+					"season_goal_involvement_pct": 12,
+					"key_passes_pct": 9,
+					"shots_pct": 14,
+					"sources": [
+						{
+							"label": "FBref Martinelli team share",
+							"url": "https://fbref.com/en/players/martinelli-share/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"scout_notes": [
+					{
+						"author": "The Athletic — Art de Roché",
+						"summary": "Martinelli's xG and output regressed from 2022-23; Trossard absorbed his minutes effectively when he sat. Below-average season relative to expectation, but still Arsenal's second-best wide outlet."
+					}
+				]
+			}
+		},
+		"context_notes": "Arsenal finished 2nd in 2023-24 (89 points, two behind City). Saka had a noticeably more productive season than Martinelli in both raw output and team-share metrics. The case is well-balanced symmetrically across two subjects."
+	},
+	"groundTruthDossier": null,
+	"__note__": "Investigator case — two-subject comparison. Tests balance scorer (both subjects have all Tier-1 fields populated with sources). Saka's clear statistical advantage is the situation under investigation, not a defect to flag."
+}

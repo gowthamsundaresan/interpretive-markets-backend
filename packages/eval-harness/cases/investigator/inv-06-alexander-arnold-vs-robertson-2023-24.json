@@ -1,0 +1,127 @@
+{
+	"id": "inv-06-alexander-arnold-vs-robertson-2023-24",
+	"kind": "investigator",
+	"question": "Is Trent Alexander-Arnold more valuable to Liverpool's attacking play than Andy Robertson in 2023-24?",
+	"manifest": {
+		"pathPrefix": "dossier://",
+		"subjects": ["Trent Alexander-Arnold", "Andy Robertson"]
+	},
+	"sourceAllowlist": [
+		"https://fbref.com/en/players/",
+		"https://understat.com/player/",
+		"https://www.transfermarkt.com/",
+		"https://theathletic.com/football/"
+	],
+	"dossier": {
+		"asOf": "2024-06-01",
+		"subjects": {
+			"Trent Alexander-Arnold": {
+				"club": "Liverpool",
+				"position": "RB/Inverted RB",
+				"age": 25,
+				"season": "2023-24",
+				"stats": {
+					"appearances_premier_league": 26,
+					"goals_premier_league": 3,
+					"assists_premier_league": 6,
+					"progressive_passes_per_90": 11.8,
+					"key_passes_per_90": 3.1,
+					"minutes_played": 2120,
+					"sources": [
+						{
+							"label": "FBref TAA 2023-24",
+							"url": "https://fbref.com/en/players/alexander-arnold-2024/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"on_off_splits": {
+					"with": { "ppg": 2.04, "gd_per_match": 1.04 },
+					"without": { "ppg": 1.83, "gd_per_match": 0.83 },
+					"sample": { "with_matches": 26, "without_matches": 12 },
+					"delta_summary": "PPG +0.21 with TAA on a meaningful 26-vs-12 sample. Bradley + Gomez handled the role serviceably.",
+					"sources": [
+						{
+							"label": "Opta Liverpool splits 2023-24",
+							"url": "https://www.opta.com/news/liverpool-splits-2024/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"team_share": {
+					"season_progressive_passes_pct": 14,
+					"key_passes_pct": 17,
+					"shots_pct": 4,
+					"sources": [
+						{
+							"label": "FBref TAA share",
+							"url": "https://fbref.com/en/players/taa-share/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"scout_notes": [
+					{
+						"author": "The Athletic — James Pearce",
+						"summary": "TAA's inverted midfield role was Klopp's primary build-up mechanism through autumn; his absences disrupted Liverpool's ability to attack vs low blocks. Key-pass volume remained league-leading despite 26 starts."
+					}
+				]
+			},
+			"Andy Robertson": {
+				"club": "Liverpool",
+				"position": "LB",
+				"age": 30,
+				"season": "2023-24",
+				"stats": {
+					"appearances_premier_league": 19,
+					"goals_premier_league": 1,
+					"assists_premier_league": 3,
+					"progressive_passes_per_90": 7.4,
+					"key_passes_per_90": 1.8,
+					"minutes_played": 1580,
+					"sources": [
+						{
+							"label": "FBref Robertson 2023-24",
+							"url": "https://fbref.com/en/players/robertson-2024/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"on_off_splits": {
+					"with": { "ppg": 1.95, "gd_per_match": 0.95 },
+					"without": { "ppg": 1.95, "gd_per_match": 0.89 },
+					"sample": { "with_matches": 19, "without_matches": 19 },
+					"delta_summary": "Essentially zero PPG delta on a 19-vs-19 sample. Tsimikas covered effectively, masking attacking output drop.",
+					"sources": [
+						{
+							"label": "Opta Liverpool splits 2023-24",
+							"url": "https://www.opta.com/news/liverpool-splits-2024/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"team_share": {
+					"season_progressive_passes_pct": 7,
+					"key_passes_pct": 9,
+					"shots_pct": 2,
+					"sources": [
+						{
+							"label": "FBref Robertson share",
+							"url": "https://fbref.com/en/players/robertson-share/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"scout_notes": [
+					{
+						"author": "The Athletic — James Pearce",
+						"summary": "Robertson's season was disrupted by a shoulder injury in October; on return he was visibly below his 2021-22 peak — overlapping runs reduced, crossing volume down 30%. Cover (Tsimikas) was competent."
+					}
+				]
+			}
+		},
+		"context_notes": "Liverpool finished 3rd in 2023-24, Klopp's final season. Both full-backs missed extended time — TAA hamstring (Jan-Feb), Robertson shoulder (Oct-Jan). Direct comparison is fair: both played enough to compare team-share contribution. The question framing ('attacking play') biases toward progressive-pass and key-pass shares, where TAA leads."
+	},
+	"groundTruthDossier": null,
+	"__note__": "Investigator case — full-back comparison. Tests that defensive-position players generate sufficient attacking-play data to be evaluated under the framework. Balance scorer should PASS — both subjects have matching field coverage."
+}

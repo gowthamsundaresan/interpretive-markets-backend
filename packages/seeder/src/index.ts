@@ -1,12 +1,18 @@
+import { seedLogsExecutorEnabledSet } from './events/seedLogsExecutorEnabledSet'
+import { seedLogsExecutorRegistered } from './events/seedLogsExecutorRegistered'
 import { seedLogsFrameworkRegistered } from './events/seedLogsFrameworkRegistered'
-import { seedLogsJudgeEnabledSet } from './events/seedLogsJudgeEnabledSet'
-import { seedLogsJudgeRegistered } from './events/seedLogsJudgeRegistered'
+import { seedLogsHarnessRuleFired } from './events/seedLogsHarnessRuleFired'
+import { seedLogsInvestigationDelivered } from './events/seedLogsInvestigationDelivered'
+import { seedLogsInvestigationStarted } from './events/seedLogsInvestigationStarted'
+import { seedLogsJudgmentDelivered } from './events/seedLogsJudgmentDelivered'
+import { seedLogsJudgmentStarted } from './events/seedLogsJudgmentStarted'
+import { seedLogsMalformedVerdict } from './events/seedLogsMalformedVerdict'
 import { seedLogsMarketCreated } from './events/seedLogsMarketCreated'
 import { seedLogsVerdictDisputed } from './events/seedLogsVerdictDisputed'
-import { seedLogsVerdictPosted } from './events/seedLogsVerdictPosted'
+import { seedLogsVerdictFinalized } from './events/seedLogsVerdictFinalized'
 import { seedDisputes } from './seedDisputes'
+import { seedExecutors } from './seedExecutors'
 import { seedFrameworks } from './seedFrameworks'
-import { seedJudges } from './seedJudges'
 import { seedMarkets } from './seedMarkets'
 import { seedVerdicts } from './seedVerdicts'
 import { loadEnv } from './utils/env'
@@ -33,14 +39,20 @@ async function seedAll() {
 		try {
 			await Promise.all([
 				seedLogsFrameworkRegistered(targetBlock),
-				seedLogsJudgeRegistered(targetBlock),
-				seedLogsJudgeEnabledSet(targetBlock),
+				seedLogsExecutorRegistered(targetBlock),
+				seedLogsExecutorEnabledSet(targetBlock),
 				seedLogsMarketCreated(targetBlock),
-				seedLogsVerdictPosted(targetBlock),
+				seedLogsInvestigationStarted(targetBlock),
+				seedLogsInvestigationDelivered(targetBlock),
+				seedLogsJudgmentStarted(targetBlock),
+				seedLogsJudgmentDelivered(targetBlock),
+				seedLogsHarnessRuleFired(targetBlock),
+				seedLogsMalformedVerdict(targetBlock),
+				seedLogsVerdictFinalized(targetBlock),
 				seedLogsVerdictDisputed(targetBlock)
 			])
 
-			await Promise.all([seedFrameworks(), seedJudges()])
+			await Promise.all([seedFrameworks(), seedExecutors()])
 			await seedMarkets()
 			await seedVerdicts()
 			await seedDisputes()

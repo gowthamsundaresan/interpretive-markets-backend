@@ -12,7 +12,7 @@ import { mainnet, sepolia } from 'viem/chains'
 
 // --- Types ---
 
-export type SupportedNetwork = 'sepolia' | 'mainnet'
+export type SupportedNetwork = 'sepolia' | 'mainnet' | 'ritual'
 
 export interface ChainClients {
 	chain: Chain
@@ -21,10 +21,34 @@ export interface ChainClients {
 	account: Account
 }
 
+// Ritual L1 chain definition. Genesis system contracts are exported separately
+// from shared/src/ritual/system.ts.
+const ritual = {
+	id: 1979,
+	name: 'Ritual',
+	nativeCurrency: { name: 'Ritual', symbol: 'RITUAL', decimals: 18 },
+	rpcUrls: {
+		default: {
+			http: ['https://rpc.ritualfoundation.org'],
+			webSocket: ['wss://rpc.ritualfoundation.org']
+		}
+	},
+	blockExplorers: {
+		default: { name: 'Ritual Explorer', url: 'https://explorer.ritualfoundation.org' }
+	}
+} as const satisfies Chain
+
 // --- Core functions ---
 
 export function getChain(network: SupportedNetwork): Chain {
-	return network === 'mainnet' ? mainnet : sepolia
+	switch (network) {
+		case 'mainnet':
+			return mainnet
+		case 'sepolia':
+			return sepolia
+		case 'ritual':
+			return ritual
+	}
 }
 
 export function publicOnly(network: SupportedNetwork, rpcUrl: string): PublicClient {

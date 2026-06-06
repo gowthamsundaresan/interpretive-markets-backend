@@ -1,19 +1,5 @@
-// Dossier fixtures for the interpretive-markets demo. Content is anchored in
-// real 2025-26 facts (Aug 2025 - May 2026 season). Match report excerpts,
-// manager quotes and scout notes are paraphrased / synthesized from publicly
-// reported events; on/off splits and team-share metrics are illustrative
-// estimates (publicly available stats sites don't expose per-player on/off
-// splits cleanly). Treat the dossier as the demo shape, not primary-source
-// truth.
-//
-// Each item that has a real upstream source carries a `source_url` — these are
-// what Opacity zkTLS attestations will eventually attach to (one proof per
-// fetched URL, mirrored into the re-exec bundle so watchers verify the
-// HTTPS response rather than re-fetching).
-//
-// The top-level `$schema` points at the dossier shape (lives inside the
-// framework tarball pinned on IPFS); `$framework` ties the dossier to the
-// on-chain framework registration so consumers can verify provenance.
+// Demo dossier fixtures. Stats and splits are illustrative estimates anchored
+// in real 2025-26 facts — not primary-source truth.
 
 const DOSSIER_SCHEMA_URL =
 	'https://raw.githubusercontent.com/gowthamsundaresan/interpretive-markets/main/frameworks/football-player-value-v1/schemas/dossierV1.json'

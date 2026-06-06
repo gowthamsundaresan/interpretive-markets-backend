@@ -11,11 +11,33 @@ import {
 import { getPublicClient } from './utils/viemClient'
 import { marketAbi } from '@interpretive/shared'
 
+// --- Types & state ---
+
 const SYNC_KEY = 'lastSyncedBlock_data_verdicts'
-const LOGS_SYNC_KEY = 'lastSyncedBlock_logs_verdict_posted'
+const LOGS_SYNC_KEY = 'lastSyncedBlock_logs_verdict_finalized'
+
+interface OnChainVerdict {
+	outcome: number
+	confidenceBps: number
+	drivingTier: number
+	subjectRef: string
+	rationaleHash: `0x${string}`
+	verdictHash: `0x${string}`
+	dossierCid: string
+	executor: `0x${string}`
+	attestedAtBlock: bigint
+}
+
+interface OnChainMarketForVerdict {
+	verdict: OnChainVerdict
+	dossierCid: string
+}
 
 // --- Core functions ---
 
+// Verdict rows are populated from the VerdictFinalized event-log archive. The headline outcome
+// + confidenceBps come from the event; the full Verdict struct (subjectRef, rationaleHash,
+// drivingTier, etc.) is read fresh from `Market.get(marketId).verdict`.
 export async function seedVerdicts(toBlock?: bigint, fromBlock?: bigint): Promise<void> {
 	const env = loadEnv()
 	const deployment = loadDeployment(env.DEPLOYMENT_FILE)
@@ -30,7 +52,7 @@ export async function seedVerdicts(toBlock?: bigint, fromBlock?: bigint): Promis
 	}
 
 	await loopThroughBlocks(firstBlock, lastBlock, async (windowFrom, windowTo) => {
-		const logs = await prisma.eventLogs_VerdictPosted.findMany({
+		const logs = await prisma.eventLogs_VerdictFinalized.findMany({
 			where: { blockNumber: { gt: windowFrom, lte: windowTo } }
 		})
 
@@ -43,10 +65,7 @@ export async function seedVerdicts(toBlock?: bigint, fromBlock?: bigint): Promis
 				abi: marketAbi,
 				functionName: 'get',
 				args: [marketId]
-			})) as {
-				verdict: { outcome: number; confidence: bigint; verdictHash: `0x${string}` }
-				resolvedAt: bigint
-			}
+			})) as OnChainMarketForVerdict
 
 			dbTransactions.push(
 				prisma.verdict.upsert({
@@ -54,21 +73,25 @@ export async function seedVerdicts(toBlock?: bigint, fromBlock?: bigint): Promis
 					create: {
 						marketId,
 						outcome: m.verdict.outcome,
-						confidence: m.verdict.confidence.toString(),
+						confidenceBps: m.verdict.confidenceBps,
+						drivingTier: m.verdict.drivingTier,
+						subjectRef: m.verdict.subjectRef,
+						rationaleHash: m.verdict.rationaleHash,
 						verdictHash: m.verdict.verdictHash,
-						bundleRef: log.bundleRef,
-						signer: log.signer,
-						postedAt: log.blockTime,
-						postedAtBlock: log.blockNumber
+						dossierCid: m.dossierCid,
+						finalizedAt: log.blockTime,
+						finalizedAtBlock: log.blockNumber
 					},
 					update: {
 						outcome: m.verdict.outcome,
-						confidence: m.verdict.confidence.toString(),
+						confidenceBps: m.verdict.confidenceBps,
+						drivingTier: m.verdict.drivingTier,
+						subjectRef: m.verdict.subjectRef,
+						rationaleHash: m.verdict.rationaleHash,
 						verdictHash: m.verdict.verdictHash,
-						bundleRef: log.bundleRef,
-						signer: log.signer,
-						postedAt: log.blockTime,
-						postedAtBlock: log.blockNumber
+						dossierCid: m.dossierCid,
+						finalizedAt: log.blockTime,
+						finalizedAtBlock: log.blockNumber
 					}
 				})
 			)

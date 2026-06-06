@@ -1,44 +1,111 @@
 # interpretive-markets-backend
 
-Indexer, API, and re-execution watcher for [`interpretive-markets`](https://github.com/gowthamsundaresan/interpretive-markets), a prediction market protocol where AI judges resolve interpretive questions against registered evaluation frameworks.
+Off-chain services for [interpretive-markets](https://github.com/gowthamsundaresan/interpretive-markets) — prediction markets resolved by AI judges against registered evaluation frameworks on **Ritual L1**.
 
-See the contracts repo for the _why_ and the full system design.
+This repo houses the indexer, public read API, consistency-audit watcher, and the eval-harness. The contracts and the framework specs live in the companion repo; this one is where chain events become queryable state and where verdicts get evaluated.
 
-## What's in here
-
-| Package                 | Role                                                                                                                                                                                                                                                                                                          |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@interpretive/prisma`  | Postgres schema (Supabase). Models for `Framework`, `Judge`, `Market`, `Verdict`, `ReExecBundle`, raw `EventLogs_*` archives, and a `Setting` key-value table for indexing cursors.                                                                                                                           |
-| `@interpretive/shared`  | Cross-package types, contract ABIs (synced from the contracts repo), content addressing helpers (sha256 + tarball + IPFS), dual-path inference client (EigenAI direct via `X-API-Key`, or EigenCloud AI Gateway via TEE JWT).                                                                                 |
-| `@interpretive/seeder`  | Chain indexer. Two-phase: tails on-chain events into raw `EventLogs_*` archive tables, then transforms them into structured `Framework`/`Judge`/`Market`/`Verdict` rows. Lazy per-chunk block-timestamp fetch.                                                                                                |
-| `@interpretive/api`     | Public read API (Fastify). Exposes `/api/v1/{frameworks,markets,judges,evidence}` for frontends, plus the evidence endpoint that judges hit during resolution (designed as the swap-in point for Opacity zkTLS).                                                                                              |
-| `@interpretive/watcher` | Re-execution bot. Polls for verdicts in `reExecStatus=pending`, fetches each re-exec bundle from IPFS, re-runs the inference, and either flips status to `verified` (gateway mode: TEE-attested) / `verified` (eigenai mode: byte-equal SHA-256) or `disputed` + files `Market.disputeVerdict()` on mismatch. |
-
-## Architecture
-
-Two-phase seeder (mirrors `eigenexplorer/lat-backend`'s pattern):
+## Workspaces
 
 ```
-chain events → EventLogs_*  (raw archive, one row per log, cursor-based)
-                    ↓
-                 seedX     (transform into structured tables)
-                    ↓
-            Framework / Judge / Market / Verdict
-                    ↓
-           api responds + watcher acts
+packages/
+├── shared/        # typed ABIs, content addressing, ritual primitives, type defs
+├── prisma/        # Postgres schema + generated client
+├── api/           # Fastify HTTP API (markets, frameworks, executors, evidence)
+├── seeder/        # chain → Postgres event indexer
+├── watcher/       # consistency audit + dispute filing
+└── eval-harness/  # held-out cases, scorers, blind labelling, foundry oracle
 ```
 
-Each event seeder and each data seeder has its own cursor in `Setting`. The raw `EventLogs_*` archive is the durable source of truth — you can drop the structured tables and replay them without re-hitting the chain.
+Six workspaces total. `shared` is consumed by every other package. `prisma` exports the generated client. `api`, `seeder`, `watcher`, `eval-harness` are runnable services.
+
+## Build
+
+```bash
+nvm exec 22 npm install
+nvm exec 22 npm run build --workspaces --if-present
+```
+
+Node 22 required (the eval-harness uses tsx + ES module loading). All five build-script workspaces (`api`, `eval-harness`, `seeder`, `shared`, `watcher`) `tsc` clean.
+
+## Eval
+
+The eval-harness is the headline package. Mock provider runs without external credentials and is safe to run anywhere:
+
+```bash
+nvm exec 22 npm run eval --workspace @interpretive/eval-harness -- --suite=all --provider=mock
+```
+
+Real-LLM provider requires one of `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` / `GEMINI_API_KEY` / `OPENROUTER_API_KEY` in `packages/eval-harness/.env`:
+
+```bash
+nvm exec 22 npm run eval --workspace @interpretive/eval-harness -- --suite=all --provider=llm
+```
+
+The `--provider=llm` path runs the judge blind (model never sees `case.expectedVerdict`) and stores proposals in `packages/eval-harness/src/judge-validation/human-labels.json` awaiting human review. Once human labels populate, the report renders judge-vs-human agreement.
+
+The rules scorer subprocess-invokes the actual Solidity `HarnessRules` bytecode via `forge script script/eval/HarnessOracle.s.sol` in the companion repo — TS fallback if `forge` isn't on PATH. Drift between off-chain eval and on-chain enforcement is structurally impossible because the eval is running the on-chain code.
+
+### Scorers
+
+Ten scorers total, split between the dossier (investigator output) and the verdict (judge output).
+
+**Investigator scorers** grade the dossier shape:
+
+- `investigator/schema` — does the dossier validate against `dossierV1.json`?
+- `investigator/completeness` — required Tier-1 fields populated per subject?
+- `investigator/citations` — every fact-bearing field has a `sources[]` array?
+- `investigator/balance` — multi-subject questions have proportional coverage?
+- `investigator/source-trust` — every cited URL matches the `sourceAllowlist` prefix?
+
+**Judge scorers** grade the verdict:
+
+- `judge/schema` — parses against the framework's `outputSchema`?
+- `judge/rules` — survives the on-chain `HarnessRules` (confidence floor, Tier-3 cap, citation prefix, subject membership) via the Foundry oracle?
+- `judge/determinism` — byte-stable across `--runs=N`?
+- `judge/grounding` — LLM-meta-scorer: do citations actually contain the cited claims?
+- `judge/reasoning` — LLM-meta-scorer: does the declared `driving_tier` match the cited evidence?
+
+## Services
+
+```bash
+# Fastify read API (port from API_PORT, default 3000)
+nvm exec 22 npm run start --workspace @interpretive/api
+
+# Chain event indexer (one-shot — call from cron / scheduler)
+nvm exec 22 npm run start --workspace @interpretive/seeder
+
+# Consistency audit watcher (loops; files disputes on hash mismatch)
+nvm exec 22 npm run start --workspace @interpretive/watcher
+```
+
+Each service has its own `.env` in `packages/<name>/.env`. The `prisma` package also expects `DATABASE_URL` + `DIRECT_URL`.
+
+## Watcher posture
+
+The watcher does **no LLM inference**. Byte-equality is undefined on Ritual L1 (FP8 + GPU non-associativity), so re-execution byte-matching does not port from EigenCloud-style restaking designs. Instead, the audit:
+
+1. Recomputes `keccak256(abi.encode(marketId, frameworkId, question, sourceAllowlist))` from current `Market.get(marketId)` and compares to the emitted `InvestigationStarted.requestBinding`.
+2. Recomputes the canonical messagesJson hash by fetching `judge.md` from the framework tarball, fetching the dossier JSON from IPFS, and assembling per the canonical pre-assembly contract.
+3. Snapshots `TEEServiceRegistry` and pins the workload identity against a known value.
+
+On any mismatch: `Market.disputeAttestation(marketId, evidence)`.
+
+## Trace replay
+
+Given a finalized market on Ritual, the eval-harness can reconstruct a Langfuse-shaped trace from on-chain events alone:
+
+```bash
+nvm exec 22 npm run replay-from-chain --workspace @interpretive/eval-harness -- \
+  --rpc-url https://rpc.ritualfoundation.org \
+  --market-address 0x... --market-id 1 --sink json
+```
+
+Set `LANGFUSE_PUBLIC_KEY` + `LANGFUSE_SECRET_KEY` and `--sink langfuse` to push instead of writing JSON. The reconstruction is from primary on-chain sources only — anyone with the RPC can re-derive it.
 
 ## Deployment
 
-The three services are independent processes designed to run as Docker containers. Top-level [`Dockerfile-API`](./Dockerfile-API), [`Dockerfile-Seeder`](./Dockerfile-Seeder), and [`Dockerfile-Watcher`](./Dockerfile-Watcher) each produce a minimal `linux/amd64` image.
+Top-level [`Dockerfile-API`](./Dockerfile-API), [`Dockerfile-Seeder`](./Dockerfile-Seeder), and [`Dockerfile-Watcher`](./Dockerfile-Watcher) each produce a minimal `linux/amd64` image. The eval-harness is a CLI, not a long-running service. The **api** needs to be publicly reachable; seeder and watcher are headless workers. All three default to `RITUAL_RPC_URL=https://rpc.ritualfoundation.org`.
 
-The **api** needs to be publicly reachable (the judge fetches evidence from it); seeder and watcher are headless workers.
+## License
 
-## Inference paths
-
-The watcher inherits the `INFERENCE_PATH` env var from the judge's mode:
-
-- `gateway` — watcher trusts the TEE attestation of the verdict (signature recovers to the registered judge signer for that image digest). No re-execution.
-- `eigenai` — watcher re-runs the EigenAI call with the same prompt + seed, computes `keccak256(rawResponse)`, and compares to the on-chain `verdictHash`. Mismatch → `disputeVerdict()`.
+MIT.

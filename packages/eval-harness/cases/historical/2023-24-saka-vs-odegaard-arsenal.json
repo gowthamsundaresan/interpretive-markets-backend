@@ -1,0 +1,116 @@
+{
+	"id": "2023-24-saka-vs-odegaard-arsenal",
+	"kind": "judge",
+	"question": "Was Bukayo Saka more valuable to Arsenal than Martin Odegaard in 2023-24?",
+	"manifest": {
+		"pathPrefix": "dossier://",
+		"subjects": ["Bukayo Saka", "Martin Odegaard"]
+	},
+	"sourceAllowlist": ["https://fbref.com/en/players/", "https://theathletic.com/football/"],
+	"dossier": {
+		"asOf": "2024-05-19",
+		"subjects": {
+			"Bukayo Saka": {
+				"club": "Arsenal",
+				"position": "RW",
+				"stats": {
+					"appearances_premier_league": 35,
+					"goals_premier_league": 16,
+					"assists_premier_league": 9,
+					"sources": [
+						{
+							"label": "FBref Saka",
+							"url": "https://fbref.com/en/players/saka-2024/",
+							"retrievedAt": "2024-05-19"
+						}
+					]
+				},
+				"on_off_splits": {
+					"with": { "ppg": 2.32 },
+					"without": { "ppg": 1.67 },
+					"sample": { "with_matches": 35, "without_matches": 3 },
+					"delta_summary": "PPG advantage with Saka but small without sample.",
+					"sources": [
+						{
+							"label": "The Athletic Arsenal",
+							"url": "https://theathletic.com/football/arsenal-2024/",
+							"retrievedAt": "2024-05-19"
+						}
+					]
+				},
+				"team_share": {
+					"season_goal_involvement_pct": 26,
+					"sources": [
+						{
+							"label": "FBref share",
+							"url": "https://fbref.com/en/players/saka-share/",
+							"retrievedAt": "2024-05-19"
+						}
+					]
+				}
+			},
+			"Martin Odegaard": {
+				"club": "Arsenal",
+				"position": "AM/CM",
+				"stats": {
+					"appearances_premier_league": 35,
+					"goals_premier_league": 8,
+					"assists_premier_league": 10,
+					"sources": [
+						{
+							"label": "FBref Odegaard",
+							"url": "https://fbref.com/en/players/odegaard-2024/",
+							"retrievedAt": "2024-05-19"
+						}
+					]
+				},
+				"on_off_splits": {
+					"with": { "ppg": 2.34 },
+					"without": { "ppg": 1.67 },
+					"sample": { "with_matches": 35, "without_matches": 3 },
+					"delta_summary": "Similar on/off shape — same denominator of three missed games as Saka, near-identical PPG drop.",
+					"sources": [
+						{
+							"label": "The Athletic Arsenal",
+							"url": "https://theathletic.com/football/arsenal-2024/",
+							"retrievedAt": "2024-05-19"
+						}
+					]
+				},
+				"team_share": {
+					"season_goal_involvement_pct": 21,
+					"key_passes_pct": 16,
+					"sources": [
+						{
+							"label": "FBref share",
+							"url": "https://fbref.com/en/players/odegaard-share/",
+							"retrievedAt": "2024-05-19"
+						}
+					]
+				},
+				"scout_notes": [
+					{
+						"author": "The Athletic — de Roché",
+						"summary": "Captain, primary creator, set-piece deliverer; the central reference point Arsenal's build-up depends on. Saka's output is downstream of Odegaard's link-play."
+					}
+				]
+			}
+		},
+		"context_notes": "Arsenal finished 2nd. Both players started 35 of 38 league matches with overlapping missed games. Goal involvements: Saka 25, Odegaard 18. Captaincy + creative-hub role belongs to Odegaard."
+	},
+	"expectedFinalOutcome": 1,
+	"expectedVerdict": {
+		"outcome": 1,
+		"confidence_bps": 5800,
+		"driving_tier": 2,
+		"subject_ref": "Bukayo Saka",
+		"citations": [
+			"dossier://subjects.Bukayo Saka.stats",
+			"dossier://subjects.Bukayo Saka.team_share",
+			"dossier://subjects.Martin Odegaard.team_share"
+		],
+		"rationale_hash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+	},
+	"__uncertain__": true,
+	"__uncertaintyNote__": "Genuinely uncertain. Saka has higher goal involvements (25 vs 18); Odegaard is captain + creative hub + free-kick taker. On/off splits are nearly identical. A YES answer at modest confidence is defensible but a NO is also defensible. driving_tier=2 because Tier-1 evidence isn't decisive. User should review."
+}

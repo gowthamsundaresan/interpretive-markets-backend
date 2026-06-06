@@ -1,0 +1,80 @@
+{
+	"id": "inv-05-foden-man-city-2023-24",
+	"kind": "investigator",
+	"question": "Is Phil Foden Manchester City's most valuable attacking player in 2023-24?",
+	"manifest": {
+		"pathPrefix": "dossier://",
+		"subjects": ["Phil Foden"]
+	},
+	"sourceAllowlist": [
+		"https://fbref.com/en/players/",
+		"https://understat.com/player/",
+		"https://www.transfermarkt.com/",
+		"https://theathletic.com/football/"
+	],
+	"dossier": {
+		"asOf": "2024-06-01",
+		"subjects": {
+			"Phil Foden": {
+				"club": "Manchester City",
+				"position": "LW/AM",
+				"age": 23,
+				"season": "2023-24",
+				"stats": {
+					"appearances_premier_league": 35,
+					"goals_premier_league": 19,
+					"assists_premier_league": 8,
+					"xg_per_90": 0.41,
+					"xa_per_90": 0.21,
+					"sources": [
+						{
+							"label": "FBref Foden 2023-24",
+							"url": "https://fbref.com/en/players/foden-2024/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"on_off_splits": {
+					"with": { "ppg": 2.46, "gd_per_match": 1.4 },
+					"without": { "ppg": 2.33, "gd_per_match": 1.0 },
+					"sample": { "with_matches": 35, "without_matches": 3 },
+					"delta_summary": "Small PPG delta (+0.13) with a very thin without sample. City's structural strength absorbs his absence — unlike Rodri.",
+					"sources": [
+						{
+							"label": "Opta City splits 2023-24",
+							"url": "https://www.opta.com/news/city-splits-2024/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"team_share": {
+					"season_goal_involvement_pct": 22,
+					"shots_pct": 21,
+					"key_passes_pct": 16,
+					"sources": [
+						{
+							"label": "FBref Foden share",
+							"url": "https://fbref.com/en/players/foden-share/",
+							"retrievedAt": "2024-06-01"
+						}
+					]
+				},
+				"scout_notes": [
+					{
+						"author": "The Athletic — Sam Lee",
+						"summary": "Foden's POTY season was driven by output efficiency in a free role behind Haaland. But irreplaceability is bounded — Bernardo and De Bruyne overlap functionally; Rodri's profile has no shadow."
+					}
+				],
+				"manager_quotes": [
+					{
+						"source": "Pep Guardiola post-match Spurs 2024-05-14",
+						"summary": "Phil has matured into one of the world's best — but our team works because we have many of him in different ways."
+					}
+				]
+			}
+		},
+		"context_notes": "Foden won the FWA Footballer of the Year and PFA Player of the Year for 2023-24. The case explores whether award + output is the same as 'most valuable'; the on/off and squad-overlap evidence are weaker than for Rodri."
+	},
+	"groundTruthDossier": null,
+	"__note__": "Investigator case — single subject with strong individual output but weak irreplaceability evidence. Designed to surface that completeness alone doesn't decide judgments."
+}

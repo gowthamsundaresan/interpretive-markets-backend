@@ -1,0 +1,128 @@
+{
+	"id": "2023-24-rodri-most-valuable-city",
+	"kind": "judge",
+	"question": "Was Rodri the most valuable player to Manchester City's title-winning 2023-24 Premier League campaign?",
+	"manifest": {
+		"pathPrefix": "dossier://",
+		"subjects": ["Rodri", "Erling Haaland"]
+	},
+	"sourceAllowlist": [
+		"https://fbref.com/en/players/",
+		"https://www.opta.com/",
+		"https://theathletic.com/football/"
+	],
+	"dossier": {
+		"asOf": "2024-05-21",
+		"subjects": {
+			"Rodri": {
+				"club": "Manchester City",
+				"position": "DM",
+				"stats": {
+					"appearances_premier_league": 34,
+					"goals_premier_league": 8,
+					"assists_premier_league": 7,
+					"sources": [
+						{
+							"label": "FBref Rodri",
+							"url": "https://fbref.com/en/players/rodri-2024/",
+							"retrievedAt": "2024-05-21"
+						}
+					]
+				},
+				"on_off_splits": {
+					"with": { "ppg": 2.61, "gd_per_match": 1.58 },
+					"without": { "ppg": 1.4, "gd_per_match": 0.2 },
+					"sample": { "with_matches": 34, "without_matches": 8 },
+					"delta_summary": "Largest reported on/off PPG delta in the Premier League for 2023-24. Sample n=8 without — limited but spans high-leverage fixtures.",
+					"sources": [
+						{
+							"label": "Opta on/off splits 2023-24",
+							"url": "https://www.opta.com/news/rodri-2024/",
+							"retrievedAt": "2024-05-21"
+						}
+					]
+				},
+				"team_share": {
+					"season_passes_pct": 12.4,
+					"progressive_passes_pct": 18,
+					"sources": [
+						{
+							"label": "FBref share",
+							"url": "https://fbref.com/en/players/rodri-share/",
+							"retrievedAt": "2024-05-21"
+						}
+					]
+				},
+				"scout_notes": [
+					{
+						"author": "The Athletic — Liam Tharme",
+						"summary": "No squad alternative replicates the receiving-under-pressure profile that lets City's structure exist."
+					}
+				]
+			},
+			"Erling Haaland": {
+				"club": "Manchester City",
+				"position": "ST",
+				"stats": {
+					"appearances_premier_league": 31,
+					"goals_premier_league": 27,
+					"assists_premier_league": 5,
+					"xg_per_90": 0.93,
+					"sources": [
+						{
+							"label": "FBref Haaland",
+							"url": "https://fbref.com/en/players/haaland-2024/",
+							"retrievedAt": "2024-05-21"
+						}
+					]
+				},
+				"on_off_splits": {
+					"with": { "ppg": 2.45 },
+					"without": { "ppg": 2.43 },
+					"sample": { "with_matches": 31, "without_matches": 7 },
+					"delta_summary": "Essentially zero PPG delta — Alvarez covered effectively. Haaland's value is in goal volume, not irreplaceability.",
+					"sources": [
+						{
+							"label": "Opta City splits",
+							"url": "https://www.opta.com/news/city-splits-2024/",
+							"retrievedAt": "2024-05-21"
+						}
+					]
+				},
+				"team_share": {
+					"season_goal_involvement_pct": 28,
+					"shots_pct": 25,
+					"sources": [
+						{
+							"label": "FBref Haaland share",
+							"url": "https://fbref.com/en/players/haaland-share/",
+							"retrievedAt": "2024-05-21"
+						}
+					]
+				},
+				"scout_notes": [
+					{
+						"author": "The Athletic — Sam Lee",
+						"summary": "Haaland missed seven league matches; Alvarez covered with 4 goals in those starts. Goal-output is dominant but role is interchangeable within Pep's system."
+					}
+				]
+			}
+		},
+		"context_notes": "Man City won the title on the final day with 91 points. Rodri started 34/38 league matches and was named PFA Player of the Season per the dossier write-up; Haaland was top scorer."
+	},
+	"expectedFinalOutcome": 1,
+	"expectedVerdict": {
+		"outcome": 1,
+		"confidence_bps": 7200,
+		"driving_tier": 1,
+		"subject_ref": "Rodri",
+		"citations": [
+			"dossier://subjects.Rodri.on_off_splits",
+			"dossier://subjects.Rodri.team_share",
+			"dossier://subjects.Erling Haaland.on_off_splits"
+		],
+		"rationale_hash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+	},
+	"__uncertain__": false,
+	"__confidenceJustification": "PFA-confirmed; on/off split delta is the largest in the league; Alvarez-covers-Haaland is well-documented. Borderline only on the margin: how to weight goal-volume vs irreplaceability under the framework."
+}

@@ -1,15 +1,21 @@
 export { PrismaClient, Prisma, ReExecStatus } from '@prisma/client'
 export type {
+	AttestedExecutor,
+	EventLogs_ExecutorEnabledSet,
+	EventLogs_ExecutorRegistered,
 	EventLogs_FrameworkRegistered,
-	EventLogs_JudgeEnabledSet,
-	EventLogs_JudgeRegistered,
+	EventLogs_HarnessRuleFired,
+	EventLogs_InvestigationDelivered,
+	EventLogs_InvestigationStarted,
+	EventLogs_JudgmentDelivered,
+	EventLogs_JudgmentStarted,
+	EventLogs_MalformedVerdict,
 	EventLogs_MarketCreated,
 	EventLogs_VerdictDisputed,
-	EventLogs_VerdictPosted,
+	EventLogs_VerdictFinalized,
 	Framework,
-	Judge,
+	MalformedVerdictRecord,
 	Market,
-	ReExecBundle,
 	Setting,
 	Verdict
 } from '@prisma/client'

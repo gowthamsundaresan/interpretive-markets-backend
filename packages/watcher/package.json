@@ -13,7 +13,6 @@
 		"@interpretive/prisma": "*",
 		"@interpretive/shared": "*",
 		"dotenv": "^16.4.5",
-		"openai": "^4.73.0",
 		"viem": "^2.21.0"
 	},
 	"devDependencies": {

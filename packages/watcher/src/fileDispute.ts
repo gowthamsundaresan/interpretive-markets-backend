@@ -31,7 +31,7 @@ export async function fileDispute(args: {
 		account,
 		address: deployment.market,
 		abi: marketAbi,
-		functionName: 'disputeVerdict',
+		functionName: 'disputeAttestation',
 		args: [args.marketId, evidence]
 	})
 
