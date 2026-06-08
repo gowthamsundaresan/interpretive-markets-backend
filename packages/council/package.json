@@ -1,0 +1,29 @@
+{
+	"name": "@interpretive/council",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
+	"scripts": {
+		"build": "tsc",
+		"council": "tsx ./src/cli.ts",
+		"council:graph-test": "tsx ./src/cli.ts --question=\"Is Erling Haaland Manchester City's most valuable player in 2023-24?\" --provider=mock"
+	},
+	"dependencies": {
+		"@interpretive/eval-harness": "*",
+		"@interpretive/shared": "*",
+		"@interpretive/watcher": "*",
+		"@anthropic-ai/claude-agent-sdk": "^0.1.5",
+		"@langchain/langgraph": "^0.4.0",
+		"dotenv": "^16.4.5",
+		"langfuse": "^3.31.0",
+		"viem": "^2.21.0",
+		"zod": "^3.23.8"
+	},
+	"devDependencies": {
+		"@types/node": "^20.12.2",
+		"tsx": "^4.7.1",
+		"typescript": "^5.4.3"
+	}
+}

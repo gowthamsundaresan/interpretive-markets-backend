@@ -1,4 +1,9 @@
-import { callLLMJudgeRaw, extractJson, loadLLMJudgeConfig } from './scorers/judge/llm-judge'
+import {
+	type LLMJudgeConfig,
+	callLLMJudgeRaw,
+	extractJson,
+	loadLLMJudgeConfig
+} from './scorers/judge/llm-judge'
 import type { EvalCase, ParsedVerdict } from './types'
 import { readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
@@ -31,37 +36,44 @@ let cachedJudgeMd: string | null = null
 
 // --- Core functions ---
 
-// Mock verdict: synthesised from case.expectedVerdict. CI path. Tautological — case-author-self-
-// consistency only. Real signal comes from --provider=llm.
+// Mock verdict: synthesised from case.expectedVerdict (or correctVerdict for attack cases). CI
+// path. Tautological — case-author-self-consistency only. Real signal comes from --provider=llm.
 export function produceMockVerdict(c: EvalCase): VerdictProductionResult {
-	if (!c.expectedVerdict) {
+	const reference = c.expectedVerdict ?? c.correctVerdict
+	if (!reference) {
 		return {
 			verdict: null,
 			rawText: null,
 			model: null,
 			provider: 'mock',
-			error: 'no expectedVerdict'
+			error: 'no expectedVerdict or correctVerdict'
 		}
 	}
 	const verdict: ParsedVerdict = {
-		outcome: c.expectedVerdict.outcome ?? 2,
-		confidence_bps: c.expectedVerdict.confidence_bps ?? 5500,
-		driving_tier: c.expectedVerdict.driving_tier ?? 3,
-		subject_ref: c.expectedVerdict.subject_ref ?? c.manifest.subjects[0],
-		citations: c.expectedVerdict.citations ?? [
+		outcome: reference.outcome ?? 2,
+		confidence_bps: reference.confidence_bps ?? 5500,
+		driving_tier: reference.driving_tier ?? 3,
+		subject_ref: reference.subject_ref ?? c.manifest.subjects[0],
+		citations: reference.citations ?? [
 			`${c.manifest.pathPrefix}subjects.${c.manifest.subjects[0]}`
 		],
-		rationale_hash: c.expectedVerdict.rationale_hash ?? `0x${'00'.repeat(32)}`
+		rationale_hash: reference.rationale_hash ?? `0x${'00'.repeat(32)}`
 	}
 	return { verdict, rawText: null, model: 'mock', provider: 'mock' }
 }
 
-// LLM verdict: the model under test is given (judge.md as system) + (question + dossier as user)
-// and asked to emit a structured verdict. BLIND: the model never sees case.expectedVerdict.
-// Returns the produced verdict + the raw model text (for proposed-label storage + failure-mode
-// debug) + an extracted rationale.
-export async function produceLLMVerdict(c: EvalCase): Promise<VerdictProductionResult> {
-	const config = loadLLMJudgeConfig()
+// LLM verdict: the model under test is given (judge.md + optional defense addendum as system) +
+// (question + dossier as user) and asked to emit a structured verdict. BLIND: the model never
+// sees case.expectedVerdict / case.correctVerdict. Returns the produced verdict + the raw model
+// text (for proposed-label storage + failure-mode debug) + an extracted rationale. An optional
+// configOverride lets cross-model probes rotate providers per call instead of falling back to
+// env-detected default.
+export async function produceLLMVerdict(
+	c: EvalCase,
+	systemPromptAddendum = '',
+	configOverride?: LLMJudgeConfig
+): Promise<VerdictProductionResult> {
+	const config = configOverride ?? loadLLMJudgeConfig()
 	if (!config.enabled) {
 		return {
 			verdict: null,
@@ -73,6 +85,7 @@ export async function produceLLMVerdict(c: EvalCase): Promise<VerdictProductionR
 	}
 
 	const judgeMd = await loadJudgeMd()
+	const systemPrompt = systemPromptAddendum ? judgeMd + systemPromptAddendum : judgeMd
 	const userPrompt = buildUserPrompt(c)
 
 	let attempt = 0
@@ -83,9 +96,9 @@ export async function produceLLMVerdict(c: EvalCase): Promise<VerdictProductionR
 		try {
 			const result = await callLLMJudgeRaw({
 				config,
-				systemPrompt: judgeMd,
+				systemPrompt,
 				userPrompt,
-				maxTokens: 2000
+				maxTokens: 2500
 			})
 			lastRawText = result.rawText
 			const parsed = parseVerdictFromLLMResponse(result.rawText)
@@ -114,10 +127,11 @@ export async function produceLLMVerdict(c: EvalCase): Promise<VerdictProductionR
 
 export async function produceVerdict(
 	c: EvalCase,
-	provider: 'mock' | 'llm'
+	provider: 'mock' | 'llm',
+	systemPromptAddendum = ''
 ): Promise<VerdictProductionResult> {
 	if (provider === 'mock') return produceMockVerdict(c)
-	return produceLLMVerdict(c)
+	return produceLLMVerdict(c, systemPromptAddendum)
 }
 
 // --- Helper functions ---
@@ -188,6 +202,11 @@ function parseVerdictFromLLMResponse(text: string): ParsedFromLLM {
 		}
 	}
 
+	const claimed_values =
+		raw.claimed_values && typeof raw.claimed_values === 'object'
+			? (raw.claimed_values as Record<string, string | number>)
+			: undefined
+
 	return {
 		verdict: {
 			outcome: outcome as 0 | 1 | 2,
@@ -195,7 +214,8 @@ function parseVerdictFromLLMResponse(text: string): ParsedFromLLM {
 			driving_tier: driving_tier as 1 | 2 | 3,
 			subject_ref,
 			citations: citations.filter((c): c is string => typeof c === 'string'),
-			rationale_hash: rationale_hash as `0x${string}`
+			rationale_hash: rationale_hash as `0x${string}`,
+			...(claimed_values ? { claimed_values } : {})
 		},
 		rationale
 	}

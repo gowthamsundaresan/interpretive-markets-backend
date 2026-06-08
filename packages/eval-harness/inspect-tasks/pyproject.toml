@@ -1,0 +1,14 @@
+[project]
+name = "interpretive-inspect-tasks"
+version = "0.1.0"
+description = "Inspect AI task wrappers for the interpretive-markets eval harness — held-out judge regression + cross-model probe entry points."
+requires-python = ">=3.11"
+dependencies = [
+    "inspect-ai>=0.3.110",
+    "anthropic>=0.40.0",
+    "openai>=1.55.0",
+    "google-genai>=0.5.0",
+]
+
+[tool.inspect_ai]
+log_dir = "./logs"

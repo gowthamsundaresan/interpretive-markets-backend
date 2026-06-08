@@ -1,3 +1,9 @@
+import type { DefenseFlag } from './defenses'
+import type { AttackClassAggregate } from './scorers/adversarial/attack-success'
+import type {
+	CrossModelClassAggregate,
+	TransferableAttackEntry
+} from './scorers/adversarial/cross-model-probe'
 import type { CalibrationReport } from './scorers/judge/calibration'
 import type { RunReport } from './types'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -19,7 +25,7 @@ export interface RunSnapshot {
 	fail: number
 	skipped: number
 	scorerCounts: Record<string, { pass: number; fail: number; skipped: number }>
-	humanAgreement: {
+	reviewerAgreement: {
 		outcome: number
 		tier: number
 		subject: number
@@ -27,6 +33,15 @@ export interface RunSnapshot {
 	} | null
 	calibration: { ece: number; maxCalibrationError: number; casesWithGroundTruth: number } | null
 	baselineFailures: { caseId: string; scorer: string; detail: string }[]
+	attackResults: {
+		defenseFlag: DefenseFlag
+		classes: AttackClassAggregate[]
+	} | null
+	crossModelResults: {
+		defenseFlag: DefenseFlag
+		classes: CrossModelClassAggregate[]
+		transferableAttacks: TransferableAttackEntry[]
+	} | null
 }
 
 export interface VersionDiff {
@@ -54,7 +69,7 @@ export interface HeadlineDelta {
 
 export function buildSnapshot(args: {
 	report: RunReport
-	humanAgreement: {
+	reviewerAgreement: {
 		outcome: number
 		tier: number
 		subject: number
@@ -62,6 +77,12 @@ export function buildSnapshot(args: {
 	} | null
 	calibration: CalibrationReport | null
 	baselineFailures: { caseId: string; scorer: string; detail: string }[]
+	attackResults: { defenseFlag: DefenseFlag; classes: AttackClassAggregate[] } | null
+	crossModelResults: {
+		defenseFlag: DefenseFlag
+		classes: CrossModelClassAggregate[]
+		transferableAttacks: TransferableAttackEntry[]
+	} | null
 }): RunSnapshot {
 	const scorerCounts: Record<string, { pass: number; fail: number; skipped: number }> = {}
 	for (const r of args.report.results) {
@@ -76,7 +97,7 @@ export function buildSnapshot(args: {
 		fail: args.report.results.filter((r) => r.outcome === 'fail').length,
 		skipped: args.report.results.filter((r) => r.outcome === 'skipped').length,
 		scorerCounts,
-		humanAgreement: args.humanAgreement,
+		reviewerAgreement: args.reviewerAgreement,
 		calibration: args.calibration
 			? {
 					ece: args.calibration.ece,
@@ -84,7 +105,9 @@ export function buildSnapshot(args: {
 					casesWithGroundTruth: args.calibration.casesWithGroundTruth
 				}
 			: null,
-		baselineFailures: args.baselineFailures
+		baselineFailures: args.baselineFailures,
+		attackResults: args.attackResults,
+		crossModelResults: args.crossModelResults
 	}
 }
 
@@ -145,9 +168,24 @@ export function computeVersionDiff(
 			current: current.calibration ? current.calibration.ece.toFixed(4) : '—'
 		},
 		{
-			metric: 'judge-vs-human outcome',
-			previous: previous.humanAgreement ? formatPct(previous.humanAgreement.outcome) : '—',
-			current: current.humanAgreement ? formatPct(current.humanAgreement.outcome) : '—'
+			metric: 'judge-vs-reviewer outcome',
+			previous: previous.reviewerAgreement ? formatPct(previous.reviewerAgreement.outcome) : '—',
+			current: current.reviewerAgreement ? formatPct(current.reviewerAgreement.outcome) : '—'
+		},
+		{
+			metric: 'overall ASR',
+			previous: formatOverallAsr(previous.attackResults),
+			current: formatOverallAsr(current.attackResults)
+		},
+		{
+			metric: 'defense config',
+			previous: previous.attackResults?.defenseFlag ?? '—',
+			current: current.attackResults?.defenseFlag ?? '—'
+		},
+		{
+			metric: 'transferable attacks',
+			previous: String(previous.crossModelResults?.transferableAttacks.length ?? 0),
+			current: String(current.crossModelResults?.transferableAttacks.length ?? 0)
 		}
 	]
 
@@ -159,4 +197,12 @@ export function computeVersionDiff(
 function formatPct(n: number): string {
 	if (Number.isNaN(n)) return '—'
 	return `${(n * 100).toFixed(1)}%`
+}
+
+function formatOverallAsr(ar: RunSnapshot['attackResults']): string {
+	if (!ar || ar.classes.length === 0) return '—'
+	const runs = ar.classes.reduce((a, x) => a + x.totalRuns, 0)
+	const successes = ar.classes.reduce((a, x) => a + x.totalSuccesses, 0)
+	if (runs === 0) return '—'
+	return `${((successes / runs) * 100).toFixed(1)}%`
 }

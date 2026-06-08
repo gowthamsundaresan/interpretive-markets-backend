@@ -1,9 +1,17 @@
+import type { DefenseFlag } from './defenses'
 import type { AgreementReport } from './judge-validation/validate'
+import type { AttackClassAggregate } from './scorers/adversarial/attack-success'
+import type {
+	CrossModelClassAggregate,
+	TransferableAttackEntry
+} from './scorers/adversarial/cross-model-probe'
 import type { CalibrationReport } from './scorers/judge/calibration'
 import type { RunReport, ScorerResult } from './types'
 import type { VersionDiff } from './version-diff'
 
 // --- Types & state ---
+
+export type ProviderRequested = 'mock' | 'llm' | 'cross-model' | 'ritual-l1'
 
 export interface RenderArgs {
 	report: RunReport
@@ -11,13 +19,30 @@ export interface RenderArgs {
 	calibration: CalibrationReport
 	versionDiff: VersionDiff
 	baselineFailures: { caseId: string; scorer: string; detail: string }[]
-	providerRequested: 'mock' | 'llm' | 'ritual-l1'
+	providerRequested: ProviderRequested
+	attackAggregate: AttackClassAggregate[]
+	defenseFlag: DefenseFlag
+	crossModelAggregate: CrossModelClassAggregate[]
+	transferableAttacks: TransferableAttackEntry[]
+	modelRotation: { id: string; label: string; model: string }[]
 }
 
 // --- Core functions ---
 
 export function renderReport(args: RenderArgs): string {
-	const { report, agreement, calibration, versionDiff, baselineFailures, providerRequested } = args
+	const {
+		report,
+		agreement,
+		calibration,
+		versionDiff,
+		baselineFailures,
+		providerRequested,
+		attackAggregate,
+		defenseFlag,
+		crossModelAggregate,
+		transferableAttacks,
+		modelRotation
+	} = args
 	const { meta, caseCount, results } = report
 	const counts = counts_(results)
 	const byScorer = groupByScorer(results)
@@ -56,13 +81,21 @@ export function renderReport(args: RenderArgs): string {
 					...baselineFailures.map((f) => `- **${f.scorer}** @ \`${f.caseId}\` — ${f.detail}`)
 				].join('\n'),
 		'',
+		'## Adversarial robustness (ASR)',
+		'',
+		renderAttackAggregate(attackAggregate, defenseFlag),
+		'',
+		'## Cross-model robustness',
+		'',
+		renderCrossModelAggregate(crossModelAggregate, transferableAttacks, modelRotation, defenseFlag),
+		'',
 		'## Calibration (Expected Calibration Error)',
 		'',
 		renderCalibration(calibration, providerRequested),
 		'',
-		'## Hand-labelled cases',
+		'## Reference reviewer agreement',
 		'',
-		renderHumanLabels(agreement, providerRequested),
+		renderReviewerLabels(agreement, providerRequested),
 		'',
 		'## Version diff',
 		'',
@@ -91,18 +124,18 @@ function renderECE(calibration: CalibrationReport): string {
 
 function renderAgreement(agreement: AgreementReport): string {
 	if (agreement.totalLabelledCases === 0) {
-		return `- **Judge-vs-human:** _awaiting human review — ${agreement.totalProposedCases} model proposals stored in \`judge-validation/human-labels.json\`, no humanVerdict slots populated yet_`
+		return `- **Judge-vs-reviewer:** _awaiting reviewer pass — ${agreement.totalProposedCases} judge proposals stored in \`judge-validation/reviewer-labels.json\`, no reviewerVerdict slots populated yet_`
 	}
 	return [
-		`- **Judge-vs-human outcome agreement:** ${pct(agreement.outcomeAgreement)} (${agreement.totalLabelledCases} hand-labelled, ${agreement.totalProposedCases} proposals total)`,
-		`- **Judge-vs-human driving-tier agreement:** ${pct(agreement.tierAgreement)}`,
-		`- **Mean confidence delta (judge vs human):** ${agreement.meanConfidenceDeltaBps.toFixed(0)} bps`
+		`- **Judge-vs-reviewer outcome agreement:** ${pct(agreement.outcomeAgreement)} (${agreement.totalLabelledCases} labelled, ${agreement.totalProposedCases} proposals total)`,
+		`- **Judge-vs-reviewer driving-tier agreement:** ${pct(agreement.tierAgreement)}`,
+		`- **Mean confidence delta (judge vs reviewer):** ${agreement.meanConfidenceDeltaBps.toFixed(0)} bps`
 	].join('\n')
 }
 
 function renderCalibration(
 	calibration: CalibrationReport,
-	providerRequested: 'mock' | 'llm' | 'ritual-l1'
+	providerRequested: ProviderRequested
 ): string {
 	if (calibration.casesWithGroundTruth === 0) {
 		return '_No ground-truth outcomes available for calibration — run with `--provider=llm` against cases with `expectedFinalOutcome`._'
@@ -131,21 +164,17 @@ function renderCalibration(
 	].join('\n')
 }
 
-function renderHumanLabels(
+function renderReviewerLabels(
 	agreement: AgreementReport,
-	providerRequested: 'mock' | 'llm' | 'ritual-l1'
+	providerRequested: ProviderRequested
 ): string {
 	if (agreement.totalLabelledCases === 0 && agreement.totalProposedCases === 0) {
-		return providerRequested === 'llm'
-			? '_LLM provider ran but no proposals were stored. Check `judge-validation/human-labels.json`._'
-			: '_No model proposals stored. Run with `--provider=llm` to populate the proposal slots; then human-review the proposals tomorrow._'
+		return providerRequested === 'llm' || providerRequested === 'cross-model'
+			? '_LLM provider ran but no proposals were stored. Check `judge-validation/reviewer-labels.json`._'
+			: '_No judge proposals stored. Run with `--provider=llm` to populate proposals and trigger the reviewer pass._'
 	}
 	if (agreement.totalLabelledCases === 0) {
-		return [
-			`_${agreement.totalProposedCases} blind model proposals are stored in \`judge-validation/human-labels.json\`. Each entry has \`status: "awaiting-human-review"\`, a \`proposedVerdict\`, and an empty \`humanVerdict\` slot. Until the human review pass populates \`humanVerdict\`, no judge-vs-human agreement number is reported._`,
-			'',
-			'_Review workflow: open the JSON, read the model\'s proposal + rationale, decide on the correct verdict, fill `humanVerdict` + `humanReasoning` + `labelledBy` + `labelledAt`, flip `status` to `"labelled"`._'
-		].join('\n')
+		return `_${agreement.totalProposedCases} blind judge proposals are stored in \`judge-validation/reviewer-labels.json\`. Each entry has \`status: "awaiting-reviewer"\`, a \`proposedVerdict\`, and an empty \`reviewerVerdict\` slot. Re-run with \`--provider=llm\` to trigger the reviewer pass; the agreement metric populates once \`reviewerVerdict\` is filled._`
 	}
 	return agreement.cases
 		.map(
@@ -153,6 +182,78 @@ function renderHumanLabels(
 				`- \`${c.caseId}\` — outcome match: ${c.outcomeMatch ? '✓' : '✗'}, subject match: ${c.subjectMatch ? '✓' : '✗'}, tier match: ${c.drivingTierMatch ? '✓' : '✗'}, |Δconfidence|: ${c.confidenceBpsDelta} bps`
 		)
 		.join('\n')
+}
+
+function renderAttackAggregate(
+	aggregate: AttackClassAggregate[],
+	defenseFlag: DefenseFlag
+): string {
+	if (aggregate.length === 0) {
+		return '_No attack suite results in this run. Add `--suite=attacks` (or `--suite=all`) with `--provider=llm` to populate this section._'
+	}
+	const overallRuns = aggregate.reduce((a, x) => a + x.totalRuns, 0)
+	const overallSuccesses = aggregate.reduce((a, x) => a + x.totalSuccesses, 0)
+	const overallAsr = overallRuns === 0 ? 0 : overallSuccesses / overallRuns
+	const polarity =
+		'_ASR is inverse — **lower is better**. 0% means the judge resisted every run. Defense config: `' +
+		defenseFlag +
+		'`._'
+	return [
+		polarity,
+		'',
+		'| Attack class | Cases | Runs | Successes | ASR |',
+		'| --- | ---: | ---: | ---: | ---: |',
+		...aggregate.map(
+			(a) =>
+				`| ${a.attackClass} | ${a.cases} | ${a.totalRuns} | ${a.totalSuccesses} | ${(a.asr * 100).toFixed(1)}% |`
+		),
+		'',
+		`**Overall ASR (defense=${defenseFlag}):** ${(overallAsr * 100).toFixed(1)}% over ${overallSuccesses}/${overallRuns} attack runs across ${aggregate.length} class(es).`
+	].join('\n')
+}
+
+function renderCrossModelAggregate(
+	aggregate: CrossModelClassAggregate[],
+	transferable: TransferableAttackEntry[],
+	modelRotation: { id: string; label: string; model: string }[],
+	defenseFlag: DefenseFlag
+): string {
+	if (aggregate.length === 0) {
+		return '_No cross-model results in this run. Run with `--provider=cross-model --models=claude,gpt5,gemini,glm` (and the matching API keys) to populate this section._'
+	}
+	const modelIds = Array.from(new Set(aggregate.flatMap((a) => Object.keys(a.perModel)))).sort()
+	const rotationLine =
+		modelRotation.length > 0
+			? `_Models in rotation: ${modelRotation.map((m) => `**${m.label}** (\`${m.model}\`)`).join(', ')}._`
+			: ''
+	const polarity = `_ASR is inverse — **lower is better**. Defense config: \`${defenseFlag}\`. **Transferable** = succeeded on ≥2 models; the Zou et al transferability signal._`
+	const header = [
+		'| Attack class | Cases',
+		...modelIds.map((id) => ` | ${id} ASR`),
+		' | Transferable |'
+	].join('')
+	const sep = ['| ---', ' | ---:', ...modelIds.map(() => ' | ---:'), ' | ---:'].join('')
+	const rows = aggregate.map((a) => {
+		const perModelCells = modelIds
+			.map((id) => {
+				const m = a.perModel[id]
+				return m ? ` | ${(m.asr * 100).toFixed(1)}%` : ' | —'
+			})
+			.join('')
+		return `| ${a.attackClass} | ${a.cases}${perModelCells} | ${a.transferableCount} |`
+	})
+	const transferableSection =
+		transferable.length === 0
+			? '_No attacks transferred across ≥2 models in this run._'
+			: [
+					'**Transferable attacks (succeeded on ≥2 models):**',
+					'',
+					...transferable.map(
+						(t) =>
+							`- \`${t.caseId}\` (${t.attackClass}) — succeeded on: ${t.succeededOn.join(', ')} — highest ASR ${(t.highestAsr * 100).toFixed(1)}%`
+					)
+				].join('\n')
+	return [rotationLine, '', polarity, '', header, sep, ...rows, '', transferableSection].join('\n')
 }
 
 function renderVersionDiff(diff: VersionDiff): string {

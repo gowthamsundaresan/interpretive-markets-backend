@@ -1,0 +1,11 @@
+[project]
+name = "interpretive-dspy"
+version = "0.1.0"
+description = "DSPy MIPROv2 optimizer over judge.md addendum candidates — metric is cross-model ASR drop, gated by the eval-harness held-out historical regression."
+requires-python = ">=3.11"
+dependencies = [
+    "dspy-ai>=2.6.0",
+    "anthropic>=0.40.0",
+    "openai>=1.55.0",
+    "google-genai>=0.5.0",
+]

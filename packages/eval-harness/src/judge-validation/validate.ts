@@ -5,23 +5,24 @@ import { fileURLToPath } from 'node:url'
 
 // --- Types & state ---
 
-const LABELS_PATH = resolve(dirname(fileURLToPath(import.meta.url)), 'human-labels.json')
+const LABELS_PATH = resolve(dirname(fileURLToPath(import.meta.url)), 'reviewer-labels.json')
 
-export type LabelStatus = 'awaiting-model-proposal' | 'awaiting-human-review' | 'labelled'
+export type LabelStatus = 'awaiting-judge-proposal' | 'awaiting-reviewer' | 'labelled'
 
-export interface HumanLabel {
+export interface ReviewerLabel {
 	status: LabelStatus
-	// Model's blind proposal (filled by runner on --provider=llm). The model does NOT see
-	// case.expectedVerdict; it sees only judge.md + question + dossier.
+	// Judge's blind proposal. The judge sees only judge.md + question + dossier — never expectedVerdict.
 	proposedVerdict: ProposedVerdict | null
 	proposedReasoning: string | null
 	proposedModel: string | null
 	proposedAt: string | null
-	// Ground truth — filled by human review. validate.ts agreement comparison reads ONLY this.
-	humanVerdict: HumanVerdict | null
-	humanReasoning: string | null
-	labelledBy: string | null
-	labelledAt: string | null
+	// Reference label produced by an independent reviewer pass. judgeReviewerAgreement reads ONLY
+	// this. The reviewer also runs blind (no expectedVerdict) but with a higher-effort prompt so
+	// the agreement metric measures "does the cheap fast judge match the careful reviewer."
+	reviewerVerdict: ReviewerVerdict | null
+	reviewerReasoning: string | null
+	reviewerModel: string | null
+	reviewedAt: string | null
 	notes?: string
 }
 
@@ -33,7 +34,7 @@ export interface ProposedVerdict {
 	citations: string[]
 }
 
-export interface HumanVerdict {
+export interface ReviewerVerdict {
 	outcome: VerdictOutcome
 	confidenceBps: number
 	drivingTier: 1 | 2 | 3
@@ -60,37 +61,39 @@ export interface AgreementReport {
 
 // --- Core functions ---
 
-export function loadHumanLabels(): Record<string, HumanLabel> {
+export function loadReviewerLabels(): Record<string, ReviewerLabel> {
 	if (!existsSync(LABELS_PATH)) return {}
-	return JSON.parse(readFileSync(LABELS_PATH, 'utf-8')) as Record<string, HumanLabel>
+	return JSON.parse(readFileSync(LABELS_PATH, 'utf-8')) as Record<string, ReviewerLabel>
 }
 
-export function persistHumanLabels(labels: Record<string, HumanLabel>): void {
+export function persistReviewerLabels(labels: Record<string, ReviewerLabel>): void {
 	writeFileSync(LABELS_PATH, JSON.stringify(labels, null, 2) + '\n')
 }
 
-export function ensureLabelEntry(labels: Record<string, HumanLabel>, caseId: string): HumanLabel {
+export function ensureLabelEntry(
+	labels: Record<string, ReviewerLabel>,
+	caseId: string
+): ReviewerLabel {
 	if (!labels[caseId]) {
 		labels[caseId] = {
-			status: 'awaiting-model-proposal',
+			status: 'awaiting-judge-proposal',
 			proposedVerdict: null,
 			proposedReasoning: null,
 			proposedModel: null,
 			proposedAt: null,
-			humanVerdict: null,
-			humanReasoning: null,
-			labelledBy: null,
-			labelledAt: null
+			reviewerVerdict: null,
+			reviewerReasoning: null,
+			reviewerModel: null,
+			reviewedAt: null
 		}
 	}
 	return labels[caseId]
 }
 
-// Write a blind proposal from the model into the label. The proposal is what the model produced
-// without seeing case.expectedVerdict; ground truth is still pending human review. Status flips
-// to awaiting-human-review.
+// Write the judge's blind proposal into the label. Status flips to awaiting-reviewer until the
+// reviewer pass populates reviewerVerdict.
 export function recordModelProposal(args: {
-	labels: Record<string, HumanLabel>
+	labels: Record<string, ReviewerLabel>
 	caseId: string
 	verdict: ParsedVerdict
 	rationale: string | null
@@ -102,29 +105,46 @@ export function recordModelProposal(args: {
 	entry.proposedModel = args.model
 	entry.proposedAt = new Date().toISOString()
 	if (entry.status !== 'labelled') {
-		entry.status = 'awaiting-human-review'
+		entry.status = 'awaiting-reviewer'
 	}
 }
 
-// Compute judge-vs-human agreement. ONLY reads entries where humanVerdict is populated. If no
-// labels are populated yet, returns NaN agreement — the report renders "awaiting human labels"
-// rather than a fake 100%.
-export function judgeHumanAgreement(verdicts: Record<string, ParsedVerdict>): AgreementReport {
-	const labels = loadHumanLabels()
+// Write the reviewer's reference label. Status flips to 'labelled'. Idempotent over reviewerVerdict —
+// the runner uses this fact to cache reviewer calls across runs (skip when already populated).
+export function recordReviewerLabel(args: {
+	labels: Record<string, ReviewerLabel>
+	caseId: string
+	verdict: ReviewerVerdict
+	reasoning: string | null
+	model: string
+}): void {
+	const entry = ensureLabelEntry(args.labels, args.caseId)
+	entry.reviewerVerdict = args.verdict
+	entry.reviewerReasoning = args.reasoning
+	entry.reviewerModel = args.model
+	entry.reviewedAt = new Date().toISOString()
+	entry.status = 'labelled'
+}
+
+// Compute judge-vs-reviewer agreement. ONLY reads entries where reviewerVerdict is populated. If
+// no labels are populated yet, returns NaN agreement — the report renders "awaiting reviewer
+// labels" rather than a fake 100%.
+export function judgeReviewerAgreement(verdicts: Record<string, ParsedVerdict>): AgreementReport {
+	const labels = loadReviewerLabels()
 	const cases: AgreementResult[] = []
 	let proposedCount = 0
 
 	for (const [caseId, label] of Object.entries(labels)) {
 		if (label.proposedVerdict) proposedCount += 1
-		if (!label.humanVerdict) continue
+		if (!label.reviewerVerdict) continue
 		const v = verdicts[caseId]
 		if (!v) continue
 		cases.push({
 			caseId,
-			outcomeMatch: v.outcome === label.humanVerdict.outcome,
-			subjectMatch: v.subject_ref === label.humanVerdict.subjectRef,
-			drivingTierMatch: v.driving_tier === label.humanVerdict.drivingTier,
-			confidenceBpsDelta: Math.abs(v.confidence_bps - label.humanVerdict.confidenceBps)
+			outcomeMatch: v.outcome === label.reviewerVerdict.outcome,
+			subjectMatch: v.subject_ref === label.reviewerVerdict.subjectRef,
+			drivingTierMatch: v.driving_tier === label.reviewerVerdict.drivingTier,
+			confidenceBpsDelta: Math.abs(v.confidence_bps - label.reviewerVerdict.confidenceBps)
 		})
 	}
 

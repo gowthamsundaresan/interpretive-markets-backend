@@ -8,7 +8,8 @@
 	"scripts": {
 		"build": "tsc",
 		"eval": "tsx ./src/runner.ts",
-		"replay-from-chain": "tsx ./src/trace-replay/replay-cli.ts"
+		"replay-from-chain": "tsx ./src/trace-replay/replay-cli.ts",
+		"inspect:held-out": "tsx ./src/inspect-tasks-bridge-cli.ts"
 	},
 	"dependencies": {
 		"@interpretive/shared": "*",

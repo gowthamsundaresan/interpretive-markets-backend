@@ -58,6 +58,105 @@ export function loadLLMJudgeConfig(): LLMJudgeConfig {
 	return { provider: null, apiKey: null, model: overrideModel ?? '', enabled: false }
 }
 
+export interface CrossModelEntry {
+	id: 'claude' | 'gpt5' | 'gemini' | 'glm'
+	label: string
+	config: LLMJudgeConfig
+}
+
+export function buildModelRotation(restrictTo?: string[]): CrossModelEntry[] {
+	const all: CrossModelEntry[] = []
+
+	if (process.env.ANTHROPIC_API_KEY) {
+		all.push({
+			id: 'claude',
+			label: 'Claude Opus 4.7',
+			config: {
+				provider: 'anthropic',
+				apiKey: process.env.ANTHROPIC_API_KEY,
+				model: process.env.LLM_MODEL_CLAUDE ?? 'claude-opus-4-7',
+				enabled: true
+			}
+		})
+	}
+	if (process.env.OPENAI_API_KEY) {
+		all.push({
+			id: 'gpt5',
+			label: 'GPT-5',
+			config: {
+				provider: 'openai',
+				apiKey: process.env.OPENAI_API_KEY,
+				model: process.env.LLM_MODEL_GPT5 ?? 'gpt-5',
+				enabled: true
+			}
+		})
+	} else if (process.env.OPENROUTER_API_KEY) {
+		all.push({
+			id: 'gpt5',
+			label: 'GPT-5 (via OpenRouter)',
+			config: {
+				provider: 'openrouter',
+				apiKey: process.env.OPENROUTER_API_KEY,
+				model: process.env.LLM_MODEL_GPT5 ?? 'openai/gpt-5',
+				enabled: true
+			}
+		})
+	}
+	if (process.env.GEMINI_API_KEY) {
+		all.push({
+			id: 'gemini',
+			label: 'Gemini 3.5 Flash',
+			config: {
+				provider: 'gemini',
+				apiKey: process.env.GEMINI_API_KEY,
+				model: process.env.LLM_MODEL_GEMINI ?? 'gemini-3.5-flash',
+				enabled: true
+			}
+		})
+	} else if (process.env.OPENROUTER_API_KEY) {
+		all.push({
+			id: 'gemini',
+			label: 'Gemini 3.5 Flash (via OpenRouter)',
+			config: {
+				provider: 'openrouter',
+				apiKey: process.env.OPENROUTER_API_KEY,
+				model: process.env.LLM_MODEL_GEMINI ?? 'google/gemini-3.5-flash',
+				enabled: true
+			}
+		})
+	}
+	// GLM-4.7-FP8 — the on-chain judge model. First try a dedicated GLM_API_KEY (z.ai direct), then
+	// fall back to OpenRouter routing. Both expose an OpenAI-compatible chat-completions API, so
+	// either works through the existing `openrouter` provider path.
+	if (process.env.GLM_API_KEY) {
+		all.push({
+			id: 'glm',
+			label: 'GLM-4.7-FP8',
+			config: {
+				provider: 'openrouter',
+				apiKey: process.env.GLM_API_KEY,
+				model: process.env.LLM_MODEL_GLM ?? 'z-ai/glm-4.7-fp8',
+				enabled: true
+			}
+		})
+	} else if (process.env.OPENROUTER_API_KEY) {
+		all.push({
+			id: 'glm',
+			label: 'GLM-4.7-FP8 (via OpenRouter)',
+			config: {
+				provider: 'openrouter',
+				apiKey: process.env.OPENROUTER_API_KEY,
+				model: process.env.LLM_MODEL_GLM ?? 'z-ai/glm-4.7-fp8',
+				enabled: true
+			}
+		})
+	}
+
+	if (!restrictTo || restrictTo.length === 0) return all
+	const allow = new Set(restrictTo)
+	return all.filter((e) => allow.has(e.id))
+}
+
 // Make a real LLM call. Returns raw text; callers parse JSON from it. Throws on HTTP error.
 // Used by both the verdict-production path (judge model under test) AND the LLM-as-judge scorers
 // (grounding/reasoning meta-judge).
