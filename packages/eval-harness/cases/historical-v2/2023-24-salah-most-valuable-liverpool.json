@@ -1,0 +1,130 @@
+{
+	"id": "2023-24-salah-most-valuable-liverpool",
+	"kind": "judge",
+	"question": "Was Mohamed Salah Liverpool's most valuable player in the 2023-24 Premier League season?",
+	"manifest": {
+		"pathPrefix": "dossier://",
+		"subjects": ["Mohamed Salah", "Alexis Mac Allister"]
+	},
+	"sourceAllowlist": [
+		"https://fbref.com/en/players/",
+		"https://theathletic.com/football/",
+		"https://www.opta.com/"
+	],
+	"dossier": {
+		"asOf": "2024-05-21",
+		"subjects": {
+			"Mohamed Salah": {
+				"club": "Liverpool",
+				"position": "RW",
+				"stats": {
+					"appearances_premier_league": 32,
+					"goals_premier_league": 18,
+					"assists_premier_league": 10,
+					"minutes_played": 2580,
+					"sources": [
+						{
+							"label": "FBref Salah",
+							"url": "https://fbref.com/en/players/salah-2024/",
+							"retrievedAt": "2024-05-21T00:00:00Z",
+							"authority": "primary"
+						}
+					]
+				},
+				"on_off_splits": {
+					"with": {
+						"ppg": 2.16
+					},
+					"without": {
+						"ppg": 1.5
+					},
+					"sample": {
+						"with_matches": 32,
+						"without_matches": 6
+					},
+					"delta_summary": "Liverpool dropped to 1.50 PPG during Salah's AFCON absence + hamstring spell (Jan-Feb), coinciding with title-race collapse.",
+					"sources": [
+						{
+							"label": "Opta Liverpool splits",
+							"url": "https://www.opta.com/news/liverpool-2024/",
+							"retrievedAt": "2024-05-21T00:00:00Z",
+							"authority": "primary"
+						}
+					]
+				},
+				"team_share": {
+					"season_goal_involvement_pct": 33,
+					"sources": [
+						{
+							"label": "FBref Salah share",
+							"url": "https://fbref.com/en/players/salah-share/",
+							"retrievedAt": "2024-05-21T00:00:00Z",
+							"authority": "primary"
+						}
+					]
+				},
+				"tier": "primary"
+			},
+			"Alexis Mac Allister": {
+				"club": "Liverpool",
+				"position": "DM/CM",
+				"stats": {
+					"appearances_premier_league": 32,
+					"goals_premier_league": 5,
+					"assists_premier_league": 5,
+					"sources": [
+						{
+							"label": "FBref Mac Allister",
+							"url": "https://fbref.com/en/players/mac-allister-2024/",
+							"retrievedAt": "2024-05-21T00:00:00Z",
+							"authority": "primary"
+						}
+					]
+				},
+				"team_share": {
+					"season_progressive_passes_pct": 12,
+					"key_passes_pct": 10,
+					"sources": [
+						{
+							"label": "FBref share",
+							"url": "https://fbref.com/en/players/mac-share/",
+							"retrievedAt": "2024-05-21T00:00:00Z",
+							"authority": "primary"
+						}
+					]
+				},
+				"scout_notes": [
+					{
+						"author": "The Athletic — Pearce",
+						"summary": "Mac Allister inverted into the six and held the structure together post-Henderson; defensively transformative but output ceiling lower than Salah."
+					}
+				],
+				"tier": "primary"
+			}
+		},
+		"context_notes": "Liverpool finished 3rd in Klopp's final season. Salah's AFCON absence (Jan-Feb) overlapped with the title-race collapse — circumstantial but informative.",
+		"question_frame": {
+			"frame": "single_club",
+			"declared_clubs": ["Liverpool"]
+		},
+		"tier_assignments": {
+			"primary": ["Mohamed Salah", "Alexis Mac Allister"],
+			"context": []
+		}
+	},
+	"expectedFinalOutcome": 1,
+	"expectedVerdict": {
+		"outcome": 1,
+		"confidence_bps": 6700,
+		"driving_tier": 1,
+		"subject_ref": "Mohamed Salah",
+		"citations": [
+			"dossier://subjects.Mohamed Salah.on_off_splits",
+			"dossier://subjects.Mohamed Salah.team_share",
+			"dossier://subjects.Mohamed Salah.stats"
+		],
+		"rationale_hash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+	},
+	"__uncertain__": false,
+	"__confidenceJustification": "Salah's output dominance + the AFCON gap correlating with the title-race collapse make a defensible YES. Mac Allister's case is real but secondary on the framework's output prong."
+}

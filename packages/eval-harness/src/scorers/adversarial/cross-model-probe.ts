@@ -51,14 +51,18 @@ export async function scoreCrossModelAttack(
 	c: EvalCase,
 	models: ModelSpec[],
 	runsPerModel: number,
-	defense: DefenseConfig
+	defense: DefenseConfig,
+	extraSystemAddendum = ''
 ): Promise<CrossModelResult> {
 	if (!c.attackClass || !c.successCondition) {
 		throw new Error(`case ${c.id} missing attackClass / successCondition`)
 	}
 
 	const perModel: Record<string, PerModelAttackResult> = {}
-	const addendum = buildSystemPromptAddendum(defense)
+	const defenseAddendum = buildSystemPromptAddendum(defense)
+	const addendum = extraSystemAddendum
+		? `${defenseAddendum}\n\n${extraSystemAddendum}`
+		: defenseAddendum
 
 	for (const m of models) {
 		const runs = await produceAttackRunsForModel(c, m, runsPerModel, addendum, defense)

@@ -46,19 +46,40 @@ def asr_metric(example: dspy.Example, pred: Any, _trace: Any | None = None) -> f
     return 1.0 if actual == expected else 0.0
 
 
+def _build_lm(model: str) -> "dspy.LM":
+    """Resolve an API key for the given litellm model string.
+
+    The judge being hardened is the production model (GLM-4.7-FP8), reached through OpenRouter, so
+    the optimized addendum is tuned for the model it will actually be deployed on — not a frontier
+    proxy. OpenRouter-routed models read OPENROUTER_API_KEY; native anthropic/* read
+    ANTHROPIC_API_KEY.
+    """
+    if model.startswith("openrouter/"):
+        key = os.environ.get("OPENROUTER_API_KEY") or os.environ.get("GLM_API_KEY")
+        if not key:
+            raise SystemExit(f"OPENROUTER_API_KEY required for judge model {model}")
+        return dspy.LM(model, api_key=key, temperature=0.0)
+    key = os.environ.get("ANTHROPIC_API_KEY")
+    if not key:
+        raise SystemExit(f"ANTHROPIC_API_KEY required for model {model}")
+    return dspy.LM(model, api_key=key, temperature=0.0)
+
+
 def main() -> None:
     input_path = Path(os.environ.get("DSPY_INPUT", DEFAULT_INPUT))
     output_path = Path(os.environ.get("DSPY_OUTPUT", DEFAULT_OUTPUT))
-    model = os.environ.get("DSPY_MODEL", "anthropic/claude-opus-4-7")
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        raise SystemExit("ANTHROPIC_API_KEY required for DSPy MIPROv2 optimization")
+
+    # The judge (task) model is the production deployment target; the proposer model evolves the
+    # addendum text. Defaults: harden GLM, propose with Opus. Both via OpenRouter by default.
+    judge_model = os.environ.get("DSPY_JUDGE_MODEL", "openrouter/z-ai/glm-4.7-fp8")
+    proposer_model = os.environ.get("DSPY_PROPOSER_MODEL", "openrouter/anthropic/claude-opus-4.7")
 
     spec = json.loads(input_path.read_text(encoding="utf-8"))
     judge_md = spec["judge_md"]
     cases = spec["cases"]
 
-    dspy.configure(lm=dspy.LM(model, api_key=api_key, temperature=0.0))
+    judge_lm = _build_lm(judge_model)
+    dspy.configure(lm=judge_lm)
 
     examples = [
         dspy.Example(
@@ -72,11 +93,17 @@ def main() -> None:
     ]
 
     program = dspy.Predict(JudgeSignature)
-    optimizer = dspy.MIPROv2(
+    mipro_kwargs = dict(
         metric=asr_metric,
         num_candidates=int(os.environ.get("DSPY_CANDIDATES", "8")),
         init_temperature=1.0,
     )
+    # Use a stronger proposer for instruction search when the DSPy build supports it; the task model
+    # stays the production judge so the candidate is evaluated on the deployment target.
+    try:
+        optimizer = dspy.MIPROv2(prompt_model=_build_lm(proposer_model), task_model=judge_lm, **mipro_kwargs)
+    except TypeError:
+        optimizer = dspy.MIPROv2(**mipro_kwargs)
     compiled = optimizer.compile(program, trainset=examples)
 
     candidate_addendum = (

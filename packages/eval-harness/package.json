@@ -9,7 +9,9 @@
 		"build": "tsc",
 		"eval": "tsx ./src/runner.ts",
 		"replay-from-chain": "tsx ./src/trace-replay/replay-cli.ts",
-		"inspect:held-out": "tsx ./src/inspect-tasks-bridge-cli.ts"
+		"inspect:held-out": "tsx ./src/inspect-tasks-bridge-cli.ts",
+		"generate-attacks": "tsx ./src/attack-gen/cli.ts",
+		"round-recap": "tsx ./src/report/round-recap.ts"
 	},
 	"dependencies": {
 		"@interpretive/shared": "*",

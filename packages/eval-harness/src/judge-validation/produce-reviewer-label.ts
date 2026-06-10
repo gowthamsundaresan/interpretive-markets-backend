@@ -15,7 +15,7 @@ const REVIEWER_MD_PATH = resolve(
 	'..',
 	'interpretive-markets',
 	'frameworks',
-	'football-player-value-v1',
+	'football-player-value-v2',
 	'reviewer.md'
 )
 

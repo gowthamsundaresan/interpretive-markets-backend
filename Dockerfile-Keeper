@@ -1,0 +1,25 @@
+FROM node:22-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+ARG CI_BUILD_VERSION
+ENV KEEPER_VERSION=$CI_BUILD_VERSION
+
+COPY package.json package-lock.json* tsconfig.base.json ./
+COPY packages/shared/package.json ./packages/shared/package.json
+COPY packages/prisma/package.json ./packages/prisma/package.json
+COPY packages/keeper/package.json ./packages/keeper/package.json
+
+RUN npm install --ignore-scripts
+
+COPY packages/shared ./packages/shared
+COPY packages/prisma ./packages/prisma
+COPY packages/keeper ./packages/keeper
+
+RUN npm run prisma:generate -w @interpretive/prisma
+RUN npm run build -w @interpretive/keeper
+
+WORKDIR /app/packages/keeper
+CMD ["npx", "tsx", "src/index.ts"]

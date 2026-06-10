@@ -1,0 +1,145 @@
+{
+	"id": "2023-24-bellingham-most-valuable-madrid",
+	"kind": "judge",
+	"question": "Was Jude Bellingham Real Madrid's most valuable player in his debut 2023-24 La Liga season?",
+	"manifest": {
+		"pathPrefix": "dossier://",
+		"subjects": ["Jude Bellingham", "Vinicius Jr"]
+	},
+	"sourceAllowlist": ["https://fbref.com/en/players/", "https://theathletic.com/football/"],
+	"dossier": {
+		"asOf": "2024-05-31",
+		"subjects": {
+			"Jude Bellingham": {
+				"club": "Real Madrid",
+				"position": "CM/AM",
+				"stats": {
+					"appearances_la_liga": 28,
+					"goals_la_liga": 19,
+					"assists_la_liga": 6,
+					"sources": [
+						{
+							"label": "FBref Bellingham",
+							"url": "https://fbref.com/en/players/bellingham-2024/",
+							"retrievedAt": "2024-05-31T00:00:00Z",
+							"authority": "primary"
+						}
+					]
+				},
+				"on_off_splits": {
+					"with": {
+						"ppg": 2.54
+					},
+					"without": {
+						"ppg": 2.2
+					},
+					"sample": {
+						"with_matches": 28,
+						"without_matches": 10
+					},
+					"delta_summary": "Meaningful PPG delta on a 28-vs-10 sample.",
+					"sources": [
+						{
+							"label": "The Athletic Madrid",
+							"url": "https://theathletic.com/football/madrid-2024/",
+							"retrievedAt": "2024-05-31T00:00:00Z",
+							"authority": "secondary"
+						}
+					]
+				},
+				"team_share": {
+					"season_goal_involvement_pct": 32,
+					"sources": [
+						{
+							"label": "FBref share",
+							"url": "https://fbref.com/en/players/bellingham-share/",
+							"retrievedAt": "2024-05-31T00:00:00Z",
+							"authority": "primary"
+						}
+					]
+				},
+				"scout_notes": [
+					{
+						"author": "The Athletic — Mark Carey",
+						"summary": "Reshaped Madrid's structure; output downstream of a role no one else could play this season."
+					}
+				],
+				"tier": "primary"
+			},
+			"Vinicius Jr": {
+				"club": "Real Madrid",
+				"position": "LW",
+				"stats": {
+					"appearances_la_liga": 26,
+					"goals_la_liga": 15,
+					"assists_la_liga": 6,
+					"sources": [
+						{
+							"label": "FBref Vinicius",
+							"url": "https://fbref.com/en/players/vinicius-2024/",
+							"retrievedAt": "2024-05-31T00:00:00Z",
+							"authority": "primary"
+						}
+					]
+				},
+				"on_off_splits": {
+					"with": {
+						"ppg": 2.5
+					},
+					"without": {
+						"ppg": 2.31
+					},
+					"sample": {
+						"with_matches": 26,
+						"without_matches": 12
+					},
+					"delta_summary": "Smaller PPG delta; Rodrygo absorbed wide-forward output in his absence.",
+					"sources": [
+						{
+							"label": "The Athletic Madrid",
+							"url": "https://theathletic.com/football/madrid-2024/",
+							"retrievedAt": "2024-05-31T00:00:00Z",
+							"authority": "secondary"
+						}
+					]
+				},
+				"team_share": {
+					"season_goal_involvement_pct": 27,
+					"sources": [
+						{
+							"label": "FBref share",
+							"url": "https://fbref.com/en/players/vinicius-share/",
+							"retrievedAt": "2024-05-31T00:00:00Z",
+							"authority": "primary"
+						}
+					]
+				},
+				"tier": "primary"
+			}
+		},
+		"context_notes": "Real Madrid won La Liga + UCL. Bellingham won UEFA Men's Player of the Year for 2023-24. Both players have plausible cases — Bellingham's role expansion vs Vinicius's individual ceiling.",
+		"question_frame": {
+			"frame": "single_club",
+			"declared_clubs": ["Real Madrid"]
+		},
+		"tier_assignments": {
+			"primary": ["Jude Bellingham", "Vinicius Jr"],
+			"context": []
+		}
+	},
+	"expectedFinalOutcome": 1,
+	"expectedVerdict": {
+		"outcome": 1,
+		"confidence_bps": 6600,
+		"driving_tier": 1,
+		"subject_ref": "Jude Bellingham",
+		"citations": [
+			"dossier://subjects.Jude Bellingham.stats",
+			"dossier://subjects.Jude Bellingham.on_off_splits",
+			"dossier://subjects.Jude Bellingham.team_share"
+		],
+		"rationale_hash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+	},
+	"__uncertain__": false,
+	"__confidenceJustification": "UEFA POY + on/off advantage + higher goal involvement; Vinicius's case is real but second-best. Confidence sits in the 65-70 bps band because the framework's irreplaceability prong is harder to assert against Vinicius."
+}

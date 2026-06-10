@@ -70,7 +70,7 @@ export function buildModelRotation(restrictTo?: string[]): CrossModelEntry[] {
 	if (process.env.ANTHROPIC_API_KEY) {
 		all.push({
 			id: 'claude',
-			label: 'Claude Opus 4.7',
+			label: process.env.LLM_LABEL_CLAUDE ?? 'Claude Opus 4.7',
 			config: {
 				provider: 'anthropic',
 				apiKey: process.env.ANTHROPIC_API_KEY,
@@ -78,11 +78,22 @@ export function buildModelRotation(restrictTo?: string[]): CrossModelEntry[] {
 				enabled: true
 			}
 		})
+	} else if (process.env.OPENROUTER_API_KEY) {
+		all.push({
+			id: 'claude',
+			label: process.env.LLM_LABEL_CLAUDE ?? 'Claude (via OpenRouter)',
+			config: {
+				provider: 'openrouter',
+				apiKey: process.env.OPENROUTER_API_KEY,
+				model: process.env.LLM_MODEL_CLAUDE ?? 'anthropic/claude-haiku-4.5',
+				enabled: true
+			}
+		})
 	}
 	if (process.env.OPENAI_API_KEY) {
 		all.push({
 			id: 'gpt5',
-			label: 'GPT-5',
+			label: process.env.LLM_LABEL_GPT5 ?? 'GPT-5',
 			config: {
 				provider: 'openai',
 				apiKey: process.env.OPENAI_API_KEY,
@@ -93,11 +104,11 @@ export function buildModelRotation(restrictTo?: string[]): CrossModelEntry[] {
 	} else if (process.env.OPENROUTER_API_KEY) {
 		all.push({
 			id: 'gpt5',
-			label: 'GPT-5 (via OpenRouter)',
+			label: process.env.LLM_LABEL_GPT5 ?? 'OpenAI (via OpenRouter)',
 			config: {
 				provider: 'openrouter',
 				apiKey: process.env.OPENROUTER_API_KEY,
-				model: process.env.LLM_MODEL_GPT5 ?? 'openai/gpt-5',
+				model: process.env.LLM_MODEL_GPT5 ?? 'openai/gpt-4.1-mini',
 				enabled: true
 			}
 		})
@@ -105,7 +116,7 @@ export function buildModelRotation(restrictTo?: string[]): CrossModelEntry[] {
 	if (process.env.GEMINI_API_KEY) {
 		all.push({
 			id: 'gemini',
-			label: 'Gemini 3.5 Flash',
+			label: process.env.LLM_LABEL_GEMINI ?? 'Gemini 3.5 Flash',
 			config: {
 				provider: 'gemini',
 				apiKey: process.env.GEMINI_API_KEY,
@@ -116,11 +127,11 @@ export function buildModelRotation(restrictTo?: string[]): CrossModelEntry[] {
 	} else if (process.env.OPENROUTER_API_KEY) {
 		all.push({
 			id: 'gemini',
-			label: 'Gemini 3.5 Flash (via OpenRouter)',
+			label: process.env.LLM_LABEL_GEMINI ?? 'Gemini (via OpenRouter)',
 			config: {
 				provider: 'openrouter',
 				apiKey: process.env.OPENROUTER_API_KEY,
-				model: process.env.LLM_MODEL_GEMINI ?? 'google/gemini-3.5-flash',
+				model: process.env.LLM_MODEL_GEMINI ?? 'google/gemini-2.5-flash-lite',
 				enabled: true
 			}
 		})
@@ -131,22 +142,22 @@ export function buildModelRotation(restrictTo?: string[]): CrossModelEntry[] {
 	if (process.env.GLM_API_KEY) {
 		all.push({
 			id: 'glm',
-			label: 'GLM-4.7-FP8',
+			label: process.env.LLM_LABEL_GLM ?? 'GLM-4.7-FP8',
 			config: {
 				provider: 'openrouter',
 				apiKey: process.env.GLM_API_KEY,
-				model: process.env.LLM_MODEL_GLM ?? 'z-ai/glm-4.7-fp8',
+				model: process.env.LLM_MODEL_GLM ?? 'z-ai/glm-4.7',
 				enabled: true
 			}
 		})
 	} else if (process.env.OPENROUTER_API_KEY) {
 		all.push({
 			id: 'glm',
-			label: 'GLM-4.7-FP8 (via OpenRouter)',
+			label: process.env.LLM_LABEL_GLM ?? 'GLM-4.7-FP8 (via OpenRouter)',
 			config: {
 				provider: 'openrouter',
 				apiKey: process.env.OPENROUTER_API_KEY,
-				model: process.env.LLM_MODEL_GLM ?? 'z-ai/glm-4.7-fp8',
+				model: process.env.LLM_MODEL_GLM ?? 'z-ai/glm-4.7',
 				enabled: true
 			}
 		})

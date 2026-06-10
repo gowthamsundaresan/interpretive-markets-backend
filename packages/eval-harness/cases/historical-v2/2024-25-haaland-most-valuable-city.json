@@ -1,0 +1,130 @@
+{
+	"id": "2024-25-haaland-most-valuable-city",
+	"kind": "judge",
+	"question": "Was Erling Haaland the most valuable player to Manchester City in the early 2024-25 Premier League season (matchweeks 1-15)?",
+	"manifest": {
+		"pathPrefix": "dossier://",
+		"subjects": ["Erling Haaland", "Rodri"]
+	},
+	"sourceAllowlist": [
+		"https://fbref.com/en/players/",
+		"https://theathletic.com/football/",
+		"https://www.opta.com/"
+	],
+	"dossier": {
+		"asOf": "2024-12-15",
+		"subjects": {
+			"Erling Haaland": {
+				"club": "Manchester City",
+				"position": "ST",
+				"stats": {
+					"appearances_premier_league_partial": 15,
+					"goals_premier_league_partial": 13,
+					"assists_premier_league_partial": 2,
+					"sources": [
+						{
+							"label": "FBref Haaland 2024-25 partial",
+							"url": "https://fbref.com/en/players/haaland-2025/",
+							"retrievedAt": "2024-12-15T00:00:00Z",
+							"authority": "primary"
+						}
+					]
+				},
+				"team_share": {
+					"partial_goal_involvement_pct": 38,
+					"shots_pct": 27,
+					"sources": [
+						{
+							"label": "FBref share",
+							"url": "https://fbref.com/en/players/haaland-2025-share/",
+							"retrievedAt": "2024-12-15T00:00:00Z",
+							"authority": "primary"
+						}
+					]
+				},
+				"scout_notes": [
+					{
+						"author": "The Athletic — Sam Lee",
+						"summary": "Haaland's output stayed high during City's 7-game winless run (Oct-Nov) — the wobble was structural, not striker-level."
+					}
+				],
+				"tier": "primary"
+			},
+			"Rodri": {
+				"club": "Manchester City",
+				"position": "DM",
+				"stats": {
+					"appearances_premier_league_partial": 5,
+					"goals_premier_league_partial": 0,
+					"assists_premier_league_partial": 0,
+					"minutes_played_partial": 380,
+					"sources": [
+						{
+							"label": "FBref Rodri 2024-25 partial",
+							"url": "https://fbref.com/en/players/rodri-2025/",
+							"retrievedAt": "2024-12-15T00:00:00Z",
+							"authority": "primary"
+						}
+					]
+				},
+				"on_off_splits": {
+					"with": {
+						"ppg": 2.4
+					},
+					"without": {
+						"ppg": 0.9
+					},
+					"sample": {
+						"with_matches": 5,
+						"without_matches": 10
+					},
+					"delta_summary": "Rodri ACL injury at the Arsenal match (Sept 22). City's 7-game winless run began three weeks later. PPG dropped from 2.40 with him to 0.90 without — the most catastrophic on/off observed in the league.",
+					"sources": [
+						{
+							"label": "Opta City 2024-25",
+							"url": "https://www.opta.com/news/city-2025/",
+							"retrievedAt": "2024-12-15T00:00:00Z",
+							"authority": "primary"
+						}
+					]
+				},
+				"team_share": {
+					"partial_passes_pct": 13.1,
+					"sources": [
+						{
+							"label": "FBref share",
+							"url": "https://fbref.com/en/players/rodri-2025-share/",
+							"retrievedAt": "2024-12-15T00:00:00Z",
+							"authority": "primary"
+						}
+					]
+				},
+				"tier": "primary"
+			}
+		},
+		"context_notes": "Partial-season snapshot (matchweeks 1-15) of the 2024-25 season. Rodri ruptured his ACL on Sept 22 vs Arsenal. City's well-documented collapse (Oct-Nov, 7-game winless run) post-Rodri-injury makes irreplaceability vs output a live test. Haaland output continued normally through the collapse.",
+		"question_frame": {
+			"frame": "single_club",
+			"declared_clubs": ["Manchester City"]
+		},
+		"tier_assignments": {
+			"primary": ["Erling Haaland", "Rodri"],
+			"context": []
+		}
+	},
+	"expectedFinalOutcome": 0,
+	"expectedVerdict": {
+		"outcome": 0,
+		"confidence_bps": 6800,
+		"driving_tier": 1,
+		"subject_ref": "Rodri",
+		"citations": [
+			"dossier://subjects.Rodri.on_off_splits",
+			"dossier://subjects.Erling Haaland.team_share",
+			"dossier://subjects.Rodri.team_share"
+		],
+		"rationale_hash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+	},
+	"__uncertain__": true,
+	"__uncertaintyNote__": "Likely NO at moderate confidence — Rodri's absence aligns directly with City's collapse, while Haaland's output continued. But partial-season window + structural collapse attribution to one player is contestable. A reasonable judge could call this UNCERTAIN. The framework prizes irreplaceability over output → NO is the on-evidence call but the partial-season nature warrants the uncertainty flag."
+}

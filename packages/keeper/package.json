@@ -1,0 +1,23 @@
+{
+	"name": "@interpretive/keeper",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"main": "./dist/index.js",
+	"scripts": {
+		"build": "tsc",
+		"start": "tsx ./src/index.ts",
+		"dev": "tsx watch --clear-screen=false ./src/index.ts"
+	},
+	"dependencies": {
+		"@interpretive/prisma": "*",
+		"@interpretive/shared": "*",
+		"dotenv": "^16.4.5",
+		"viem": "^2.21.0"
+	},
+	"devDependencies": {
+		"@types/node": "^20.12.2",
+		"tsx": "^4.7.1",
+		"typescript": "^5.4.3"
+	}
+}

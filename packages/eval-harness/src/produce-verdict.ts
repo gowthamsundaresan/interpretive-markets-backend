@@ -12,16 +12,22 @@ import { fileURLToPath } from 'node:url'
 // --- Types & state ---
 
 const PACKAGE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const JUDGE_MD_PATH = resolve(
+const FRAMEWORKS_ROOT = resolve(
 	PACKAGE_ROOT,
 	'..',
 	'..',
 	'..',
 	'interpretive-markets',
-	'frameworks',
-	'football-player-value-v1',
-	'judge.md'
+	'frameworks'
 )
+
+// EVAL_FRAMEWORK_SLUG picks which framework's judge.md is loaded as the system prompt. Defaults
+// to v1 for backward compatibility with existing eval-report.json baselines; set to
+// 'football-player-value-v2' to evaluate the v2 framework + v2-transformed historical cases.
+function judgeMdPath(): string {
+	const slug = process.env.EVAL_FRAMEWORK_SLUG ?? 'compound-interpretive-value'
+	return resolve(FRAMEWORKS_ROOT, slug, 'judge.md')
+}
 
 export interface VerdictProductionResult {
 	verdict: ParsedVerdict | null
@@ -32,7 +38,8 @@ export interface VerdictProductionResult {
 	rationale?: string
 }
 
-let cachedJudgeMd: string | null = null
+// Keyed by framework slug so swapping frameworks mid-process picks up the right judge.md.
+const judgeMdCache: Record<string, string> = {}
 
 // --- Core functions ---
 
@@ -137,9 +144,10 @@ export async function produceVerdict(
 // --- Helper functions ---
 
 async function loadJudgeMd(): Promise<string> {
-	if (cachedJudgeMd) return cachedJudgeMd
-	cachedJudgeMd = readFileSync(JUDGE_MD_PATH, 'utf-8')
-	return cachedJudgeMd
+	const path = judgeMdPath()
+	if (judgeMdCache[path]) return judgeMdCache[path]
+	judgeMdCache[path] = readFileSync(path, 'utf-8')
+	return judgeMdCache[path]
 }
 
 function buildUserPrompt(c: EvalCase): string {
@@ -207,6 +215,16 @@ function parseVerdictFromLLMResponse(text: string): ParsedFromLLM {
 			? (raw.claimed_values as Record<string, string | number>)
 			: undefined
 
+	// Eval-only compound fields (compound-interpretive-value). Captured loosely — compound-attack
+	// scorers read sub_verdicts/composition arithmetic; the on-chain parser never sees these.
+	const sub_verdicts = Array.isArray(raw.sub_verdicts)
+		? (raw.sub_verdicts as ParsedVerdict['sub_verdicts'])
+		: undefined
+	const composition_audit =
+		typeof raw.composition_audit === 'string' ? raw.composition_audit : undefined
+	const cross_claim_consistency =
+		typeof raw.cross_claim_consistency === 'string' ? raw.cross_claim_consistency : undefined
+
 	return {
 		verdict: {
 			outcome: outcome as 0 | 1 | 2,
@@ -215,7 +233,10 @@ function parseVerdictFromLLMResponse(text: string): ParsedFromLLM {
 			subject_ref,
 			citations: citations.filter((c): c is string => typeof c === 'string'),
 			rationale_hash: rationale_hash as `0x${string}`,
-			...(claimed_values ? { claimed_values } : {})
+			...(claimed_values ? { claimed_values } : {}),
+			...(sub_verdicts ? { sub_verdicts } : {}),
+			...(composition_audit ? { composition_audit } : {}),
+			...(cross_claim_consistency ? { cross_claim_consistency } : {})
 		},
 		rationale
 	}

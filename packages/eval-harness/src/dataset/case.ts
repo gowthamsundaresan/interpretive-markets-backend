@@ -10,7 +10,7 @@ const PACKAGE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..'
 // --- Core functions ---
 
 export function loadCasesFromDir(
-	subdir: 'historical' | 'investigator' | 'adversarial' | 'adversarial-attacks'
+	subdir: 'historical' | 'historical-v2' | 'investigator' | 'adversarial' | 'adversarial-attacks'
 ): EvalCase[] {
 	const dir = resolve(PACKAGE_ROOT, 'cases', subdir)
 	const files = readdirSync(dir).filter((f) => f.endsWith('.json'))
