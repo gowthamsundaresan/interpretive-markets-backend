@@ -7,7 +7,6 @@ import { fileURLToPath } from 'node:url'
 
 // --- Types & state ---
 
-// Five hops up reach the Projects root, where interpretive-markets is a sibling of this repo.
 const FRAMEWORKS_ROOT = resolve(
 	dirname(fileURLToPath(import.meta.url)),
 	'..',
@@ -140,7 +139,6 @@ export async function runInvestigator(opts: InvestigatorRunOptions): Promise<Inv
 
 	let parsed = parseDossier(rawFinal)
 	if (!parsed.dossier) {
-		// Forced no-tools emission when the agent didn't produce a parseable dossier (prose or maxTurns).
 		messages.push({
 			role: 'user',
 			content:

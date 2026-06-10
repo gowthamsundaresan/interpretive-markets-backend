@@ -1,9 +1,4 @@
 export * from './types'
-export { loadHistoricalCases } from './dataset/historical'
-export { loadInvestigatorCases } from './dataset/investigator'
-export { loadAdversarialCases } from './dataset/adversarial'
-export { loadAttackCases } from './dataset/attacks'
-export * from './trace-replay/index'
 export {
 	type LLMJudgeConfig,
 	type LLMProvider,
@@ -16,32 +11,32 @@ export {
 	loadLLMJudgeConfig
 } from './scorers/judge/llm-judge'
 export {
-	type ModelSpec,
-	type CrossModelResult,
-	type CrossModelClassAggregate,
-	type TransferableAttackEntry,
-	type PerModelAttackResult,
-	scoreCrossModelAttack,
-	aggregateCrossModelByClass,
-	extractTransferableAttacks,
-	flattenCrossModelResults
-} from './scorers/adversarial/cross-model-probe'
-export {
-	type AttackRun,
-	type AttackClassAggregate,
-	scoreAttackSuccess,
-	aggregateByAttackClass
-} from './scorers/adversarial/attack-success'
-export {
-	type DefenseConfig,
-	type DefenseFlag,
-	buildDefenseConfig,
-	buildSystemPromptAddendum,
-	parseDefenseFlag,
-	verifyCitations
-} from './defenses'
-export {
 	type VerdictProductionResult,
 	produceLLMVerdict,
-	produceMockVerdict
+	produceMockVerdict,
+	produceVerdict
 } from './produce-verdict'
+export {
+	type ExploitSurface,
+	type ExploitSuccess,
+	type ExploitCase,
+	type ExploitResult,
+	type ExploitRunResult
+} from './investigator/exploit-types'
+export { type SourceFixture, type FetchLogEntry, makeFetchTool } from './investigator/fetch-tool'
+export {
+	type InvestigatorProvider,
+	type InvestigatorResult,
+	type InvestigatorRunOptions,
+	runInvestigator
+} from './investigator/agent'
+export { type RunExploitOptions, runExploit } from './investigator/run-exploit'
+export { scoreInvestigatorRun, adjudicateWildcard } from './investigator/score'
+export { type GenerateOptions, generateExploits } from './investigator/generate'
+export {
+	type PatchLoopOptions,
+	type PatchLoopResult,
+	runPatchLoop
+} from './investigator/patch-loop'
+export { CLEAN_CASES } from './investigator/clean-cases'
+export { type RunStore, startRun } from './investigator/run-store'

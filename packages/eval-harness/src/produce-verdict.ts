@@ -21,9 +21,6 @@ const FRAMEWORKS_ROOT = resolve(
 	'frameworks'
 )
 
-// EVAL_FRAMEWORK_SLUG picks which framework's judge.md is loaded as the system prompt. Defaults
-// to v1 for backward compatibility with existing eval-report.json baselines; set to
-// 'football-player-value-v2' to evaluate the v2 framework + v2-transformed historical cases.
 function judgeMdPath(): string {
 	const slug = process.env.EVAL_FRAMEWORK_SLUG ?? 'compound-interpretive-value'
 	return resolve(FRAMEWORKS_ROOT, slug, 'judge.md')
@@ -38,13 +35,10 @@ export interface VerdictProductionResult {
 	rationale?: string
 }
 
-// Keyed by framework slug so swapping frameworks mid-process picks up the right judge.md.
 const judgeMdCache: Record<string, string> = {}
 
 // --- Core functions ---
 
-// Mock verdict: synthesised from case.expectedVerdict (or correctVerdict for attack cases). CI
-// path. Tautological — case-author-self-consistency only. Real signal comes from --provider=llm.
 export function produceMockVerdict(c: EvalCase): VerdictProductionResult {
 	const reference = c.expectedVerdict ?? c.correctVerdict
 	if (!reference) {
@@ -69,12 +63,6 @@ export function produceMockVerdict(c: EvalCase): VerdictProductionResult {
 	return { verdict, rawText: null, model: 'mock', provider: 'mock' }
 }
 
-// LLM verdict: the model under test is given (judge.md + optional defense addendum as system) +
-// (question + dossier as user) and asked to emit a structured verdict. BLIND: the model never
-// sees case.expectedVerdict / case.correctVerdict. Returns the produced verdict + the raw model
-// text (for proposed-label storage + failure-mode debug) + an extracted rationale. An optional
-// configOverride lets cross-model probes rotate providers per call instead of falling back to
-// env-detected default.
 export async function produceLLMVerdict(
 	c: EvalCase,
 	systemPromptAddendum = '',
@@ -215,8 +203,6 @@ function parseVerdictFromLLMResponse(text: string): ParsedFromLLM {
 			? (raw.claimed_values as Record<string, string | number>)
 			: undefined
 
-	// Eval-only compound fields (compound-interpretive-value). Captured loosely — compound-attack
-	// scorers read sub_verdicts/composition arithmetic; the on-chain parser never sees these.
 	const sub_verdicts = Array.isArray(raw.sub_verdicts)
 		? (raw.sub_verdicts as ParsedVerdict['sub_verdicts'])
 		: undefined

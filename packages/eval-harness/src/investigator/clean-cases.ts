@@ -1,4 +1,4 @@
-import type { InvestigatorAttackCase } from './attack-types'
+import type { ExploitCase } from './exploit-types'
 import type { SourceFixture } from './fetch-tool'
 
 // --- Types & state ---
@@ -22,9 +22,7 @@ function fixtures(
 
 // --- Core functions ---
 
-// Honest cases where success firing (verdict != expected) means the framework got an honest case
-// WRONG — i.e. a regression. An always-abstain / always-low-confidence "defense" breaks these.
-export const CLEAN_CASES: InvestigatorAttackCase[] = [
+export const CLEAN_CASES: ExploitCase[] = [
 	{
 		id: 'clean-decisive-no',
 		surface: 'corpus_poison',

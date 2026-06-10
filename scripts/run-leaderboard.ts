@@ -1,11 +1,11 @@
 // Usage: set -a && . ./packages/eval-harness/.env && set +a && nvm exec 22 npx tsx scripts/run-leaderboard.ts
 // Env: ATTACKERS, SURFACES, COUNT, RUNS
 import type {
-	InvestigatorAttackResult,
-	InvestigatorSurface
-} from '../packages/eval-harness/src/investigator/attack-types'
-import { generateInvestigatorAttacks } from '../packages/eval-harness/src/investigator/generate'
-import { runInvestigatorAttack } from '../packages/eval-harness/src/investigator/run-attack'
+	ExploitResult,
+	ExploitSurface
+} from '../packages/eval-harness/src/investigator/exploit-types'
+import { generateExploits } from '../packages/eval-harness/src/investigator/generate'
+import { runExploit } from '../packages/eval-harness/src/investigator/run-exploit'
 import { startRun } from '../packages/eval-harness/src/investigator/run-store'
 
 process.env.EVAL_FRAMEWORK_SLUG = 'compound-interpretive-value'
@@ -20,7 +20,7 @@ const ROSTER = (
 
 const SURFACES = (process.env.SURFACES || 'wildcard')
 	.split(',')
-	.map((s) => s.trim()) as InvestigatorSurface[]
+	.map((s) => s.trim()) as ExploitSurface[]
 
 const COUNT = Number(process.env.COUNT || '1')
 const RUNS = Number(process.env.RUNS || '1')
@@ -53,7 +53,7 @@ async function main() {
 		ts: Date.now()
 	})
 	const rows: Row[] = []
-	const caseResults: { attacker: string; surface: string; result: InvestigatorAttackResult }[] = []
+	const caseResults: { attacker: string; surface: string; result: ExploitResult }[] = []
 
 	for (const attacker of ROSTER) {
 		console.log(`\n### attacker: ${attacker}`)
@@ -61,7 +61,7 @@ async function main() {
 		for (const surface of SURFACES) {
 			let cases = []
 			try {
-				cases = await generateInvestigatorAttacks({
+				cases = await generateExploits({
 					attackerModel: attacker,
 					surface,
 					count: COUNT
@@ -76,11 +76,12 @@ async function main() {
 			}
 			const s = row.perSurface.get(surface) ?? { exploitsFound: 0, attempts: 0, void: 0 }
 			for (const c of cases) {
-				const r = await runInvestigatorAttack(c, {
+				const r = await runExploit(c, {
 					frameworkSlug: 'compound-interpretive-value',
 					investigatorModel: 'z-ai/glm-4.7',
 					judgeModelId: 'glm',
-					runs: RUNS
+					runs: RUNS,
+					store
 				})
 				const landed = r.successes > 0
 				for (const t of [s, row]) {
@@ -90,7 +91,6 @@ async function main() {
 				}
 				const tag = r.validRuns === 0 ? 'VOID' : landed ? 'EXPLOIT' : 'resisted'
 				console.log(`  [${surface}] ${c.id}: ${tag}  (${r.perRun[0].detail})`)
-				store.writeAttack(c)
 				caseResults.push({ attacker, surface, result: r })
 			}
 			row.perSurface.set(surface, s)

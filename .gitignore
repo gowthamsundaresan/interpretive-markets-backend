@@ -11,3 +11,4 @@ packages/eval-harness/reports/
 packages/eval-harness/src/judge-validation/human-labels.json
 *.tsbuildinfo
 fly.*.toml
+docs/

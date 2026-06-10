@@ -106,9 +106,10 @@ async function main() {
 	)
 	const judgeCase = {
 		id: 'seam-bellingham',
-		kind: 'attack' as const,
+		kind: 'exploit' as const,
 		question: QUESTION,
 		manifest: { pathPrefix: 'dossier://', subjects },
+		sourceAllowlist: ALLOWLIST,
 		dossier: inv.dossier
 	}
 	const prod = await produceLLMVerdict(judgeCase, '', glm.config)

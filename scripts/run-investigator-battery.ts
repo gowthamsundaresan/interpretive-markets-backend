@@ -1,6 +1,6 @@
 // Usage: set -a && . ./packages/eval-harness/.env && set +a && nvm exec 22 npx tsx scripts/run-investigator-battery.ts
 // Env: INVESTIGATOR_MODEL, RUNS, CASES
-import { runInvestigatorAttack } from '../packages/eval-harness/src/investigator/run-attack'
+import { runExploit } from '../packages/eval-harness/src/investigator/run-exploit'
 import { startRun } from '../packages/eval-harness/src/investigator/run-store'
 import { BATTERY } from './investigator-battery'
 
@@ -19,16 +19,16 @@ async function main() {
 
 	const store = startRun('battery', Date.now())
 	store.writeManifest({ defenderModel: model, runs, cases: cases.map((c) => c.id), ts: Date.now() })
-	cases.forEach((c) => store.writeAttack(c))
 
 	const results = []
 	for (const c of cases) {
 		process.stdout.write(`• ${c.id} [${c.surface}] ... `)
-		const r = await runInvestigatorAttack(c, {
+		const r = await runExploit(c, {
 			frameworkSlug: 'compound-interpretive-value',
 			investigatorModel: model,
 			judgeModelId: 'glm',
-			runs
+			runs,
+			store
 		})
 		results.push(r)
 		const v = r.perRun[0]

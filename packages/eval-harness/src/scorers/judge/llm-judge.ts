@@ -17,9 +17,6 @@ export interface LLMCallResult {
 
 // --- Core functions ---
 
-// Auto-detect provider + key from env. Provider preference order: ANTHROPIC > OPENAI > GEMINI >
-// OPENROUTER. The first one with a key set wins. Returns enabled=false when none are set so the
-// runner can skip cleanly.
 export function loadLLMJudgeConfig(): LLMJudgeConfig {
 	const overrideModel = process.env.LLM_JUDGE_MODEL
 
@@ -136,9 +133,6 @@ export function buildModelRotation(restrictTo?: string[]): CrossModelEntry[] {
 			}
 		})
 	}
-	// GLM-4.7-FP8 — the on-chain judge model. First try a dedicated GLM_API_KEY (z.ai direct), then
-	// fall back to OpenRouter routing. Both expose an OpenAI-compatible chat-completions API, so
-	// either works through the existing `openrouter` provider path.
 	if (process.env.GLM_API_KEY) {
 		all.push({
 			id: 'glm',
@@ -168,9 +162,6 @@ export function buildModelRotation(restrictTo?: string[]): CrossModelEntry[] {
 	return all.filter((e) => allow.has(e.id))
 }
 
-// Make a real LLM call. Returns raw text; callers parse JSON from it. Throws on HTTP error.
-// Used by both the verdict-production path (judge model under test) AND the LLM-as-judge scorers
-// (grounding/reasoning meta-judge).
 export async function callLLMJudgeRaw(args: {
 	config: LLMJudgeConfig
 	systemPrompt: string
@@ -197,8 +188,6 @@ export async function callLLMJudgeRaw(args: {
 	throw new Error(`unknown provider: ${args.config.provider}`)
 }
 
-// LLM-as-judge meta-judge call: ask the model to render a binary pass/fail on some claim about
-// a verdict (grounding, reasoning). Returns a structured judgment.
 export async function callLLMJudge(args: {
 	config: LLMJudgeConfig
 	instruction: string
@@ -233,8 +222,6 @@ export async function callLLMJudge(args: {
 		return { verdict: 'skipped', reasoning: `LLM-judge call failed: ${(err as Error).message}` }
 	}
 }
-
-// --- Provider implementations ---
 
 async function callAnthropic(
 	config: LLMJudgeConfig,
@@ -387,21 +374,19 @@ async function callOpenRouter(
 
 // --- Helper functions ---
 
-// Extract a JSON object from an LLM response. Tries direct parse first; falls back to extracting
-// the first {...} block (handles models that wrap output in markdown fences or commentary).
 export function extractJson(text: string): unknown {
 	const trimmed = text.trim()
 	try {
 		return JSON.parse(trimmed)
 	} catch {
-		// fall through
+		/* fall through */
 	}
 	const fenced = trimmed.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/)
 	if (fenced) {
 		try {
 			return JSON.parse(fenced[1])
 		} catch {
-			// fall through
+			/* fall through */
 		}
 	}
 	const firstBrace = trimmed.indexOf('{')
@@ -410,7 +395,7 @@ export function extractJson(text: string): unknown {
 		try {
 			return JSON.parse(trimmed.slice(firstBrace, lastBrace + 1))
 		} catch {
-			// fall through
+			/* fall through */
 		}
 	}
 	throw new Error(`no parseable JSON in LLM response: ${text.slice(0, 200)}`)

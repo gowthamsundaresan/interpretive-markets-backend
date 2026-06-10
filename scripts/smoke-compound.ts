@@ -215,9 +215,10 @@ const dossier = {
 
 const testCase: EvalCase = {
 	id: 'control-bellingham-compound',
-	kind: 'attack',
+	kind: 'exploit',
 	question: dossier.compoundQuestion,
 	manifest: { pathPrefix: 'dossier://', subjects: ['bellingham', 'vinicius'] },
+	sourceAllowlist: ['https://fbref.com/', 'https://understat.com/', 'https://www.theathletic.com/'],
 	dossier
 }
 
